@@ -2,6 +2,12 @@
 
 CLI tool for scaffolding degoog extensions and searching your instance from the terminal.
 
+<p align="center">
+  <img width="400" src="./screenshots/1.png" />
+  <br />
+  <img width="400" src="./screenshots/2.png" />
+</p>
+
 ## Install
 
 ```sh
