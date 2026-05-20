@@ -1,0 +1,23 @@
+{
+  "name": "degoog-cli",
+  "version": "0.1.0",
+  "description": "CLI toolset for degoog",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "build": "bun run build:linux-x64 && bun run build:linux-arm64 && bun run build:mac-x64 && bun run build:mac-arm64 && bun run build:win",
+    "build:linux-x64": "bun build --compile --target=bun-linux-x64 src/index.ts --outfile dist/degoog-cli-linux-x64",
+    "build:linux-arm64": "bun build --compile --target=bun-linux-arm64 src/index.ts --outfile dist/degoog-cli-linux-arm64",
+    "build:mac-x64": "bun build --compile --target=bun-darwin-x64 src/index.ts --outfile dist/degoog-cli-darwin-x64",
+    "build:mac-arm64": "bun build --compile --target=bun-darwin-arm64 src/index.ts --outfile dist/degoog-cli-darwin-arm64",
+    "build:win": "bun build --compile --target=bun-windows-x64 src/index.ts --outfile dist/degoog-cli-windows-x64.exe",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@clack/prompts": "^0.9.1"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.8.3"
+  }
+}

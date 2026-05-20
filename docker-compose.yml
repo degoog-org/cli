@@ -1,0 +1,11 @@
+services:
+  degoog-cli:
+    image: ghcr.io/degoog-org/cli:latest
+    stdin_open: true
+    tty: true
+    environment:
+      - DEGOOG_CONFIG_HOME=/degoog-config
+    volumes:
+      - "${HOME}/.config/degoog:/degoog-config"
+      - "${OUTPUT_DIR:-.}:/workspace"
+    working_dir: /workspace

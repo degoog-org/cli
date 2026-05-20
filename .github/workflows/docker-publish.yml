@@ -1,0 +1,139 @@
+name: Build and Publish
+
+on:
+  push:
+    branches: ["main", "develop"]
+    tags: ["*"]
+
+jobs:
+  build-amd64:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: degoog-cli is degoog-clive for his friends
+        id: repo
+        run: echo "name=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Buildx baby
+        uses: docker/setup-buildx-action@v3
+
+      - name: Boring github login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Carefully extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ steps.repo.outputs.name }}
+          tags: |
+            type=ref,event=branch,suffix=-amd64
+            type=ref,event=tag,suffix=-amd64
+            type=raw,value=latest,suffix=-amd64,enable=${{ startsWith(github.ref, 'refs/tags/') }}
+
+      - name: AMD64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  build-arm64:
+    runs-on: ubuntu-22.04-arm
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: degoog-cli is degoog-clive for his friends
+        id: repo
+        run: echo "name=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: QEMU baby
+        uses: docker/setup-qemu-action@v3
+
+      - name: Buildx baby
+        uses: docker/setup-buildx-action@v3
+
+      - name: Boring github login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Carefully extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ steps.repo.outputs.name }}
+          tags: |
+            type=ref,event=branch,suffix=-arm64
+            type=ref,event=tag,suffix=-arm64
+            type=raw,value=latest,suffix=-arm64,enable=${{ startsWith(github.ref, 'refs/tags/') }}
+
+      - name: ARM64 image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  manifest:
+    needs: [build-amd64, build-arm64]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: degoog-cli is degoog-clive for his friends
+        id: repo
+        run: echo "name=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Boring github login
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Carefully extract metadata for final manifest
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ steps.repo.outputs.name }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/') }}
+
+      - name: Clive manifesto incoming
+        run: |
+          echo "${{ steps.meta.outputs.tags }}" | while read -r tag; do
+            if [ -z "$tag" ]; then continue; fi
+            echo "Creating manifest for ${tag}"
+            docker buildx imagetools create --tag "${tag}" \
+              "${tag}-amd64" \
+              "${tag}-arm64"
+          done

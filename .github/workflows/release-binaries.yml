@@ -1,0 +1,49 @@
+name: Build and Release Binaries
+
+on:
+  push:
+    tags: ["*"]
+
+jobs:
+  build-binaries:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Bun, not rust.. yet
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Get version from tag
+        id: version
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Pray this all works
+        run: |
+          mkdir -p dist
+          bun build --compile --target=bun-linux-x64    src/index.ts --outfile dist/degoog-cli-linux-x64
+          bun build --compile --target=bun-linux-arm64  src/index.ts --outfile dist/degoog-cli-linux-arm64
+          bun build --compile --target=bun-darwin-x64   src/index.ts --outfile dist/degoog-cli-darwin-x64
+          bun build --compile --target=bun-darwin-arm64 src/index.ts --outfile dist/degoog-cli-darwin-arm64
+          bun build --compile --target=bun-windows-x64  src/index.ts --outfile dist/degoog-cli-windows-x64.exe
+
+      - name: Checksums because trust nobody
+        run: |
+          cd dist
+          sha256sum degoog-cli-* > checksums.txt
+
+      - name: Attach to Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/degoog-cli-*
+          tag_name: ${{ steps.version.outputs.version }}
