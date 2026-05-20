@@ -51,7 +51,7 @@ fi
 
 printf "\n"
 printf "Choice [1]: "
-read -r CHOICE
+read -r CHOICE < /dev/tty
 CHOICE="${CHOICE:-1}"
 
 METHOD=$(echo "$OPTS" | cut -d' ' -f"$CHOICE")
