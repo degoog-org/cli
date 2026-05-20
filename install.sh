@@ -28,6 +28,8 @@ HAS_DOWNLOAD=0
 command -v docker > /dev/null 2>&1 && HAS_DOCKER=1
 { command -v curl > /dev/null 2>&1 || command -v wget > /dev/null 2>&1; } && HAS_DOWNLOAD=1
 
+exec 3</dev/tty 2>/dev/null || exec 3<&0
+
 # Build the menu dynamically based on what's available
 
 printf "\nHow do you want to install degoog-cli?\n\n"
@@ -51,7 +53,7 @@ fi
 
 printf "\n"
 printf "Choice [1]: "
-read -r CHOICE < /dev/tty 2>/dev/null || CHOICE=""
+read -r CHOICE <&3 2>/dev/null || CHOICE=""
 CHOICE="${CHOICE:-1}"
 
 METHOD=$(echo "$OPTS" | cut -d' ' -f"$CHOICE")
