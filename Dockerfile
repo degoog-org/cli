@@ -15,4 +15,5 @@ VOLUME ["/workspace", "/degoog-config"]
 ENV DEGOOG_CONFIG_HOME=/degoog-config
 WORKDIR /workspace
 
+USER root
 ENTRYPOINT ["/entrypoint.sh"]
