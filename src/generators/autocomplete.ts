@@ -23,11 +23,6 @@ export const getSuggestions = async (
   context: {
     fetch: typeof fetch
     lang: string
-    createCache: <T>(ttlMs: number) => {
-      get: (key: string) => T | undefined
-      set: (key: string, value: T) => void
-      clear: () => void
-    }
   }
 ): Promise<Suggestion[]> => {
   // TODO: implement autocomplete logic

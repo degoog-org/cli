@@ -25,6 +25,15 @@ export const executeSearch = async (
     buildAcceptLanguage: () => string
     dateFrom?: string
     dateTo?: string
+    sentinel?: (
+      response: { ok: boolean; status: number },
+      engineName?: string
+    ) => void
+    engineError?: (
+      status: string,
+      message: string,
+      opts?: { httpStatus?: number; engine?: string }
+    ) => Error
   }
 ) => {
   const results: Array<{
@@ -35,10 +44,17 @@ export const executeSearch = async (
     thumbnail?: string
   }> = []
 
-  // TODO: implement search logic
-  // use context.fetch instead of global fetch
-
-  return results
+  try {
+    const doFetch = context?.fetch ?? fetch
+    const response = await doFetch(\`https://api.example.com/search?q=\${encodeURIComponent(query)}\`)
+    context?.sentinel?.(response, name)
+    const data = await response.json()
+    // TODO: map data into results
+    return results
+  } catch (e: any) {
+    if (e?.name === "SentinelBreach") throw e
+    return []
+  }
 }
 `
 

@@ -34,10 +34,11 @@ export const slot = {
     readFile: (filename: string) => Promise<string>
     signProxyUrl: (url: string) => string
     fetch: typeof fetch
-    createCache: <T>(ttlMs: number) => {
-      get: (key: string) => T | undefined
-      set: (key: string, value: T) => void
-      clear: () => void
+    useCache: <T>(namespace: string, defaultTtlMs: number) => {
+      get: (key: string) => Promise<T | null>
+      set: (key: string, value: T, ttlMs?: number) => Promise<void>
+      delete: (key: string) => Promise<void>
+      clear: () => Promise<void>
     }
   }) {
     return {
