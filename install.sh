@@ -3,7 +3,6 @@
 # Use me babe: curl -fsSL https://raw.githubusercontent.com/degoog-org/cli/main/install.sh | sh
 set -e
 
-INSTALL_DIR="/usr/local/bin"
 CMD_NAME="degoog-cli"
 IMAGE="ghcr.io/degoog-org/cli:latest"
 RELEASES="https://github.com/degoog-org/cli/releases/latest/download"
@@ -14,13 +13,35 @@ RESET="\033[0m"
 ok()  { printf "${GREEN}ok${RESET}  %s\n" "$1"; }
 die() { printf "error: %s\n" "$1" >&2; exit 1; }
 
+check_path() {
+  DIR="$(dirname "$1")"
+  case ":$PATH:" in
+    *":$DIR:"*) ;;
+    *) printf "note: add %s to your PATH: export PATH=\"%s:\$PATH\"\n" "$DIR" "$DIR" ;;
+  esac
+}
+
+pick_install_dir() {
+  if [ -w "/usr/local/bin" ]; then
+    printf "/usr/local/bin"
+  elif command -v sudo > /dev/null 2>&1; then
+    printf "/usr/local/bin"
+  else
+    mkdir -p "$HOME/.local/bin"
+    printf "%s/.local/bin" "$HOME"
+  fi
+}
+
 install_to() {
+  INSTALL_DIR="$(pick_install_dir)"
   if [ -w "$INSTALL_DIR" ]; then
     mv "$1" "$INSTALL_DIR/$CMD_NAME"
+    chmod +x "$INSTALL_DIR/$CMD_NAME"
   else
     sudo mv "$1" "$INSTALL_DIR/$CMD_NAME"
+    sudo chmod +x "$INSTALL_DIR/$CMD_NAME"
   fi
-  chmod +x "$INSTALL_DIR/$CMD_NAME" 2>/dev/null || sudo chmod +x "$INSTALL_DIR/$CMD_NAME"
+  printf "%s" "$INSTALL_DIR/$CMD_NAME"
 }
 
 HAS_DOCKER=0
@@ -75,6 +96,7 @@ CONFIG_DIR="\$HOME/.config/degoog"
 mkdir -p "\$CONFIG_DIR"
 docker run --rm -it \\
   --user "\$(id -u):\$(id -g)" \\
+  --cap-add SETGID \\
   -e DEGOOG_CONFIG_HOME=/degoog-config \\
   -v "\$CONFIG_DIR:/degoog-config" \\
   -v "\$(pwd):/workspace" \\
@@ -82,8 +104,9 @@ docker run --rm -it \\
   $IMAGE "\$@"
 EOF
 
-  install_to "$TMP"
-  ok "installed degoog-cli (Docker) - run it from anywhere with: degoog-cli"
+  INSTALLED="$(install_to "$TMP")"
+  ok "installed degoog-cli (Docker) to $INSTALLED"
+  check_path "$INSTALLED"
   exit 0
 fi
 
@@ -119,5 +142,6 @@ else
   wget -qO "$TMP" "$RELEASES/$BINARY"
 fi
 
-install_to "$TMP"
-ok "installed degoog-cli (binary) - run it from anywhere with: degoog-cli"
+INSTALLED="$(install_to "$TMP")"
+ok "installed degoog-cli (binary) to $INSTALLED"
+check_path "$INSTALLED"

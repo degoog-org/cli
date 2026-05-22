@@ -6,6 +6,7 @@ mkdir -p "$CONFIG_DIR"
 
 docker run --rm -it \
   --user "$(id -u):$(id -g)" \
+  --cap-add SETGID \
   -e DEGOOG_CONFIG_HOME=/degoog-config \
   -v "$CONFIG_DIR:/degoog-config" \
   -v "$(pwd):/workspace" \

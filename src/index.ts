@@ -4,7 +4,7 @@ import { createCmd } from "./commands/create.ts"
 import { searchCmd } from "./commands/search.ts"
 import { doctorCmd } from "./commands/doctor.ts"
 import { title, t } from "./utils/theme.ts"
-import { checkLatest, VERSION, REPO } from "./utils/version.ts"
+import { checkLatest, VERSION, updateCmd } from "./utils/version.ts"
 
 const SUBCOMMANDS: Record<string, () => Promise<void>> = {
   create: async () => { await createCmd() },
@@ -46,9 +46,9 @@ const main = async () => {
       process.exit(0)
     }
 
-    if (action === "update") {
-      p.log.info(`run the install script to update: https://github.com/${REPO}/releases/latest`)
-      continue
+    if (action === "update" && newVersion) {
+      p.outro(`run: ${t.brand(updateCmd(newVersion))}`)
+      process.exit(0)
     }
     if (action === "login") await loginCmd()
     if (action === "create") await createCmd()
