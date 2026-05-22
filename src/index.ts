@@ -4,7 +4,7 @@ import { createCmd } from "./commands/create.ts"
 import { searchCmd } from "./commands/search.ts"
 import { doctorCmd } from "./commands/doctor.ts"
 import { title, t } from "./utils/theme.ts"
-import { checkLatest, VERSION } from "./utils/version.ts"
+import { checkLatest, VERSION, REPO } from "./utils/version.ts"
 
 const SUBCOMMANDS: Record<string, () => Promise<void>> = {
   create: async () => { await createCmd() },
@@ -29,27 +29,27 @@ const main = async () => {
     new Promise<null>((res) => setTimeout(() => res(null), 2000)),
   ])
 
-  if (newVersion) {
-    p.log.warn(t.warning(`v${newVersion} is available (you have v${VERSION}) - run the install script to update`))
-  }
-
   while (true) {
-    const action = await p.select({
-      message: t.muted("what do you want to do?"),
-      options: [
-        { value: "create", label: t.text("Create extension"), hint: "scaffold a new degoog extension" },
-        { value: "search", label: t.text("Search"),           hint: "search your degoog instance from the terminal" },
-        { value: "login",  label: t.text("Login / Setup"),    hint: "configure your instance and author details" },
-        { value: "doctor", label: t.text("Doctor"),            hint: "validate a local extension folder" },
-        { value: "exit",   label: t.muted("Exit") },
-      ],
-    })
+    const options = [
+      ...(newVersion ? [{ value: "update", label: t.warning(`Update to v${newVersion}`), hint: `you have v${VERSION}` }] : []),
+      { value: "create", label: t.text("Create extension"), hint: "scaffold a new degoog extension" },
+      { value: "search", label: t.text("Search"),           hint: "search your degoog instance from the terminal" },
+      { value: "login",  label: t.text("Login / Setup"),    hint: "configure your instance and author details" },
+      { value: "doctor", label: t.text("Doctor"),           hint: "validate a local extension folder" },
+      { value: "exit",   label: t.muted("Exit") },
+    ]
+
+    const action = await p.select({ message: t.muted("what do you want to do?"), options })
 
     if (p.isCancel(action) || action === "exit") {
       p.outro(t.muted("bye"))
       process.exit(0)
     }
 
+    if (action === "update") {
+      p.log.info(`run the install script to update: https://github.com/${REPO}/releases/latest`)
+      continue
+    }
     if (action === "login") await loginCmd()
     if (action === "create") await createCmd()
     if (action === "search") await searchCmd()
