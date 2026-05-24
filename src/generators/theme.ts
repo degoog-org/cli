@@ -10,8 +10,9 @@ import {
   srchImageCardHtml, srchVideoCardHtml,
   srchMediaPreviewHtml, srchLightboxHtml, srchAtAGlanceHtml,
 } from "../templates/theme-assets.ts"
+import { HTMLBundle } from "bun"
 
-const HTML_PAGE_KEYS = ["layout", "index", "search", "404", "gandalf", "robots-takeover"] as const
+export const HTML_PAGE_KEYS = ["layout", "index", "search", "404", "gandalf", "robots-takeover"] as const
 const TEMPLATE_KEYS = [
   "home-logo", "home-search", "home-header", "home-footer",
   "search-header", "search-tabs", "result", "image-card",
@@ -22,51 +23,51 @@ type HtmlPageKey = typeof HTML_PAGE_KEYS[number]
 type TemplateKey = typeof TEMPLATE_KEYS[number]
 
 const PAGE_PATHS: Record<HtmlPageKey, string> = {
-  "layout":          "layout.html",
-  "index":           "index.html",
-  "search":          "search.html",
-  "404":             "404.html",
-  "gandalf":         "easter-eggs/gandalf.html",
+  "layout": "layout.html",
+  "index": "index.html",
+  "search": "search.html",
+  "404": "404.html",
+  "gandalf": "easter-eggs/gandalf.html",
   "robots-takeover": "easter-eggs/robots-takeover.html",
 }
 
-const PAGE_CONTENT: Record<HtmlPageKey, string> = {
-  "layout":          layoutHtml,
-  "index":           indexHtml,
-  "search":          searchHtml,
-  "404":             html404,
-  "gandalf":         gandalfHtml,
+const PAGE_CONTENT: Record<HtmlPageKey, HTMLBundle> = {
+  "layout": layoutHtml,
+  "index": indexHtml,
+  "search": searchHtml,
+  "404": html404,
+  "gandalf": gandalfHtml,
   "robots-takeover": robotsHtml,
 }
 
 const TPL_PATHS: Record<TemplateKey, string> = {
-  "home-logo":           "index-templates/logo.html",
-  "home-search":         "index-templates/search.html",
-  "home-header":         "index-templates/header.html",
-  "home-footer":         "index-templates/footer.html",
-  "search-header":       "search-templates/header.html",
-  "search-tabs":         "search-templates/tabs.html",
-  "result":              "search-templates/result.html",
-  "image-card":          "search-templates/image-card.html",
-  "video-card":          "search-templates/video-card.html",
-  "search-media-preview":"search-templates/media-preview.html",
-  "search-lightbox":     "search-templates/lightbox.html",
-  "at-a-glance":         "search-templates/at-a-glance.html",
+  "home-logo": "index-templates/logo.html",
+  "home-search": "index-templates/search.html",
+  "home-header": "index-templates/header.html",
+  "home-footer": "index-templates/footer.html",
+  "search-header": "search-templates/header.html",
+  "search-tabs": "search-templates/tabs.html",
+  "result": "search-templates/result.html",
+  "image-card": "search-templates/image-card.html",
+  "video-card": "search-templates/video-card.html",
+  "search-media-preview": "search-templates/media-preview.html",
+  "search-lightbox": "search-templates/lightbox.html",
+  "at-a-glance": "search-templates/at-a-glance.html",
 }
 
-const TPL_CONTENT: Record<TemplateKey, string> = {
-  "home-logo":           idxLogoHtml,
-  "home-search":         idxSearchHtml,
-  "home-header":         idxHeaderHtml,
-  "home-footer":         idxFooterHtml,
-  "search-header":       srchHeaderHtml,
-  "search-tabs":         srchTabsHtml,
-  "result":              srchResultHtml,
-  "image-card":          srchImageCardHtml,
-  "video-card":          srchVideoCardHtml,
-  "search-media-preview":srchMediaPreviewHtml,
-  "search-lightbox":     srchLightboxHtml,
-  "at-a-glance":         srchAtAGlanceHtml,
+const TPL_CONTENT: Record<TemplateKey, HTMLBundle> = {
+  "home-logo": idxLogoHtml,
+  "home-search": idxSearchHtml,
+  "home-header": idxHeaderHtml,
+  "home-footer": idxFooterHtml,
+  "search-header": srchHeaderHtml,
+  "search-tabs": srchTabsHtml,
+  "result": srchResultHtml,
+  "image-card": srchImageCardHtml,
+  "video-card": srchVideoCardHtml,
+  "search-media-preview": srchMediaPreviewHtml,
+  "search-lightbox": srchLightboxHtml,
+  "at-a-glance": srchAtAGlanceHtml,
 }
 
 const cssTpl = () => `:root {
@@ -210,7 +211,6 @@ const buildThemeJson = (name: string, sel: Selection): string => {
   type Manifest = {
     name: string
     description: string
-    version: string
     css?: string
     html?: Partial<Record<HtmlPageKey, string>>
     templates?: Partial<Record<TemplateKey, string>>
@@ -218,7 +218,7 @@ const buildThemeJson = (name: string, sel: Selection): string => {
     dataAttrsFromSettings?: Record<string, string>
   }
 
-  const manifest: Manifest = { name, description: "", version: "1.0.0" }
+  const manifest: Manifest = { name, description: "" }
 
   if (sel.includeCss) manifest.css = "style.css"
 
@@ -246,25 +246,25 @@ export const generateTheme = async (ctx: GeneratorCtx) => {
   const chosen = await p.multiselect<string>({
     message: t.muted("what do you want to include in your theme?"),
     options: [
-      { value: "css",              label: t.text("Custom styles"),           hint: "CSS variable overrides for colours and spacing" },
-      { value: "layout",           label: t.text("Base layout"),             hint: "Full HTML shell - head, scripts, tokens. Override with care" },
-      { value: "index",            label: t.text("Home page"),               hint: "index.html - the landing page" },
-      { value: "search",           label: t.text("Search results page"),     hint: "search.html - the full results listing" },
-      { value: "404",              label: t.text("404 page"),                hint: "Custom not-found page" },
-      { value: "easter-eggs",      label: t.text("Easter eggs"),             hint: "Gandalf and robots-takeover pages" },
-      { value: "home-logo",        label: t.text("Home: logo"),              hint: "Replace the logo area on the home page" },
-      { value: "home-search",      label: t.text("Home: search bar"),        hint: "Replace the search form on the home page" },
-      { value: "home-header",      label: t.text("Home: header"),            hint: "Replace the top navigation on the home page" },
-      { value: "home-footer",      label: t.text("Home: footer"),            hint: "Replace the page footer" },
-      { value: "search-header",    label: t.text("Search: header bar"),      hint: "Logo + search bar + settings gear on results page" },
-      { value: "search-tabs",      label: t.text("Search: result tabs"),     hint: "Web / Images / Videos / News tab strip" },
-      { value: "result",           label: t.text("Search: result card"),     hint: "Individual web and news result items" },
-      { value: "image-card",       label: t.text("Search: image card"),      hint: "Image grid thumbnails" },
-      { value: "video-card",       label: t.text("Search: video card"),      hint: "Video result cards" },
+      { value: "css", label: t.text("Custom styles"), hint: "CSS variable overrides for colours and spacing" },
+      { value: "layout", label: t.text("Base layout"), hint: "Full HTML shell - head, scripts, tokens. Override with care" },
+      { value: "index", label: t.text("Home page"), hint: "index.html - the landing page" },
+      { value: "search", label: t.text("Search results page"), hint: "search.html - the full results listing" },
+      { value: "404", label: t.text("404 page"), hint: "Custom not-found page" },
+      { value: "easter-eggs", label: t.text("Easter eggs"), hint: "Gandalf and robots-takeover pages" },
+      { value: "home-logo", label: t.text("Home: logo"), hint: "Replace the logo area on the home page" },
+      { value: "home-search", label: t.text("Home: search bar"), hint: "Replace the search form on the home page" },
+      { value: "home-header", label: t.text("Home: header"), hint: "Replace the top navigation on the home page" },
+      { value: "home-footer", label: t.text("Home: footer"), hint: "Replace the page footer" },
+      { value: "search-header", label: t.text("Search: header bar"), hint: "Logo + search bar + settings gear on results page" },
+      { value: "search-tabs", label: t.text("Search: result tabs"), hint: "Web / Images / Videos / News tab strip" },
+      { value: "result", label: t.text("Search: result card"), hint: "Individual web and news result items" },
+      { value: "image-card", label: t.text("Search: image card"), hint: "Image grid thumbnails" },
+      { value: "video-card", label: t.text("Search: video card"), hint: "Video result cards" },
       { value: "search-media-preview", label: t.text("Search: media preview"), hint: "Expanded image/video preview panel" },
-      { value: "search-lightbox",  label: t.text("Search: lightbox"),        hint: "Full-screen image lightbox" },
-      { value: "at-a-glance",      label: t.text("Search: at-a-glance"),     hint: "AI / knowledge panel" },
-      { value: "settings-schema",  label: t.text("User settings"),           hint: "Adds configurable options (e.g. colour variants)" },
+      { value: "search-lightbox", label: t.text("Search: lightbox"), hint: "Full-screen image lightbox" },
+      { value: "at-a-glance", label: t.text("Search: at-a-glance"), hint: "AI / knowledge panel" },
+      { value: "settings-schema", label: t.text("User settings"), hint: "Adds configurable options (e.g. colour variants)" },
     ],
     required: false,
   })
@@ -287,9 +287,9 @@ export const generateTheme = async (ctx: GeneratorCtx) => {
     includeSettings: chosen.includes("settings-schema"),
   }
 
-  const files: Record<string, string> = {
+  const files: Record<string, string | HTMLBundle> = {
     "theme.json": buildThemeJson(ctx.name, sel),
-    "README.md":  themeReadmeTpl(ctx.name),
+    "README.md": themeReadmeTpl(ctx.name),
     "author.json": authorJsonTpl(ctx.config),
   }
 
@@ -299,3 +299,4 @@ export const generateTheme = async (ctx: GeneratorCtx) => {
 
   return scaffoldDir(ctx.outDir, ctx.name, files)
 }
+  

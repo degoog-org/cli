@@ -2,7 +2,7 @@ import * as p from "@clack/prompts"
 import { loginCmd } from "./commands/login.ts"
 import { createCmd } from "./commands/create.ts"
 import { searchCmd } from "./commands/search.ts"
-import { doctorCmd } from "./commands/doctor.ts"
+import { doctorCmd } from "./commands/doctor/index.ts"
 import { title, t } from "./utils/theme.ts"
 import { checkLatest, VERSION, updateCmd } from "./utils/version.ts"
 

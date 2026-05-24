@@ -2,12 +2,14 @@ import { mkdir, writeFile } from "node:fs/promises"
 import { join, resolve, dirname } from "node:path"
 import { logger } from "./logger.ts"
 import type { Config } from "../types/index.ts"
+import { HTMLBundle } from "bun"
 
 export const mkdirp = async (dir: string) => {
   await mkdir(dir, { recursive: true })
 }
 
-export const writeOut = async (filePath: string, content: string) => {
+export const writeOut = async (filePath: string, content: string | HTMLBundle) => {
+  // @ts-expect-error - Bun supports writing HTMLBundles
   await writeFile(filePath, content, "utf8")
 }
 
@@ -17,7 +19,7 @@ export const resolveOut = (outDir: string, name: string) =>
 export const scaffoldDir = async (
   outDir: string,
   name: string,
-  files: Record<string, string>
+  files: Record<string, string | HTMLBundle>
 ) => {
   const base = resolveOut(outDir, name)
   await mkdirp(base)

@@ -10,7 +10,13 @@ const indexTpl = (name: string) => `export const interceptor = {
   // ],
   //
   // configure(settings) {},
-  // async init(ctx) {},
+  // async init(ctx) {
+  //   ctx.pluginId // installed plugin folder ID assigned by degoog (alias: ctx.id)
+  //   ctx.apiBase  // /api/plugin/<ctx.pluginId> - base for your own routes
+  //   ctx.routeUrl // (path) => /api/plugin/<ctx.pluginId>/<path>
+  //   ctx.dir      // absolute path to plugin folder (do NOT derive route IDs from it)
+  //   ctx.readFile // async file reader
+  // },
 
   async intercept(query: string, context: {
     fetch: typeof fetch
