@@ -1,5 +1,6 @@
 import * as p from "@clack/prompts"
 import { t } from "./theme.ts"
+import { Option } from "@clack/prompts"
 
 const exitCancelled = (): never => {
   p.cancel(t.muted("cancelled"))
@@ -31,11 +32,16 @@ export const promptConfirm = async (
   return ans === true
 }
 
+type SelectOption<T extends string> = {
+  value: T
+  label: string
+}
+
 export const promptSelect = async <T extends string>(
   message: string,
-  options: { value: T; label: string; hint?: string }[],
+  options: SelectOption<T>[],
 ): Promise<T> => {
-  const picked = await p.select<T>({ message, options })
+  const picked = await p.select<T>({ message, options: options as Option<T>[] })
   if (p.isCancel(picked)) exitCancelled()
   return picked as T
 }
