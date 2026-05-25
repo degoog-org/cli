@@ -33,7 +33,7 @@ export const detectInstall = (): InstallMethod => {
   return InstallMethod.Binary
 }
 
-export const updateCmd = (version: string): string => {
+export const updateCmd = (): string => {
   switch (detectInstall()) {
     case InstallMethod.Bun: return `bun update -g degoog-cli`
     case InstallMethod.Npm: return `npm update -g degoog-cli`
