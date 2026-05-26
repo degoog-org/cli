@@ -16,6 +16,14 @@ type SearchResp = {
   relatedSearches: string[];
 };
 
+const PAGE_SIZE = 10;
+
+const parseSearchQuery = (): string | undefined => {
+  const argStart = process.argv[2] === "search" ? 3 : 2;
+  const args = process.argv.slice(argStart).filter((a) => !a.startsWith("-"));
+  return args.length ? args.join(" ") : undefined;
+};
+
 const openUrl = (url: string) => {
   const cmd = process.platform === "darwin" ? "open" : "xdg-open";
   try {
@@ -46,19 +54,28 @@ const wrap = (text: string, width: number): string[] => {
 const truncate = (s: string, max: number) =>
   s.length > max ? s.slice(0, max - 1) + "…" : s;
 
-const renderResults = (data: SearchResp) => {
+const totalPages = (count: number) => Math.max(1, Math.ceil(count / PAGE_SIZE));
+
+const renderResults = (
+  data: SearchResp,
+  page: number,
+  showRelated: boolean,
+) => {
   const cols = process.stdout.columns ?? 100;
   const maxWidth = Math.min(cols - 8, 90);
   const pad = "      ";
+  const pages = totalPages(data.results.length);
+  const start = (page - 1) * PAGE_SIZE;
+  const pageResults = data.results.slice(start, start + PAGE_SIZE);
 
   console.log();
   console.log(
-    `  ${t.muted(`${data.results.length} results · ${data.totalTime}ms`)}`,
+    `  ${t.muted(`page ${page}/${pages} · ${data.results.length} results · ${data.totalTime}ms`)}`,
   );
   console.log();
 
-  data.results.forEach((r, i) => {
-    const num = t.dim(`  ${String(i + 1).padStart(2)}  `);
+  pageResults.forEach((r, i) => {
+    const num = t.dim(`  ${String(start + i + 1).padStart(2)}  `);
     console.log(`${num}${t.bold(t.brand(truncate(r.title, maxWidth)))}`);
     console.log(`${pad}${t.success(truncate(r.url, maxWidth))}`);
 
@@ -74,7 +91,7 @@ const renderResults = (data: SearchResp) => {
     console.log();
   });
 
-  if (data.relatedSearches?.length) {
+  if (showRelated && data.relatedSearches?.length) {
     const related = data.relatedSearches
       .slice(0, 5)
       .map((s) => t.primary(s))
@@ -105,6 +122,67 @@ const doSearch = async (
   return result.data;
 };
 
+const promptQuery = async (): Promise<string | null> => {
+  const query = await p.text({
+    message: t.brand("search"),
+    placeholder: "what are you looking for?",
+  });
+  if (p.isCancel(query) || !query) return null;
+  return query;
+};
+
+const browseResults = async (data: SearchResp): Promise<"again" | "back"> => {
+  let page = 1;
+  const pages = totalPages(data.results.length);
+
+  while (true) {
+    renderResults(data, page, page === 1);
+
+    const openOpts = data.results
+      .slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+      .map((r, i) => ({
+        value: `open:${(page - 1) * PAGE_SIZE + i}`,
+        label: t.text(truncate(r.title, 60)),
+      }));
+
+    const navOpts = [
+      ...(page > 1
+        ? [{ value: "prev", label: t.muted("previous page") }]
+        : []),
+      ...(page < pages
+        ? [{ value: "next", label: t.muted("next page") }]
+        : []),
+    ];
+
+    const action = await p.select({
+      message: t.muted("open a result, search again, or go back"),
+      options: [
+        ...openOpts,
+        ...navOpts,
+        { value: "again", label: t.muted("search again") },
+        { value: "back", label: t.muted("back to menu") },
+      ],
+    });
+
+    if (p.isCancel(action) || action === "back") return "back";
+    if (action === "again") return "again";
+    if (action === "next") {
+      page = Math.min(page + 1, pages);
+      continue;
+    }
+    if (action === "prev") {
+      page = Math.max(page - 1, 1);
+      continue;
+    }
+
+    if (typeof action === "string" && action.startsWith("open:")) {
+      const idx = parseInt(action.slice(5), 10);
+      const target = data.results[idx];
+      if (target) openUrl(target.url);
+    }
+  }
+};
+
 export const searchCmd = async () => {
   const config = await loadConfig();
 
@@ -113,12 +191,13 @@ export const searchCmd = async () => {
     return;
   }
 
+  let pendingQuery = parseSearchQuery();
+
   while (true) {
-    const query = await p.text({
-      message: t.brand("search"),
-      placeholder: "what are you looking for?",
-    });
-    if (p.isCancel(query) || !query) return;
+    const query = pendingQuery ?? (await promptQuery());
+    pendingQuery = undefined;
+
+    if (!query) return;
 
     const data = await doSearch(query, config);
     if (!data) return;
@@ -128,31 +207,7 @@ export const searchCmd = async () => {
       continue;
     }
 
-    renderResults(data);
-
-    const openOpts = data.results.slice(0, 5).map((r, i) => ({
-      value: `open:${i}`,
-      label: t.text(`open #${i + 1}`),
-      hint: truncate(r.title, 50),
-    }));
-
-    const action = await p.select({
-      message: t.muted("open a result, search again, or go back"),
-      options: [
-        ...openOpts,
-        { value: "again", label: t.muted("search again") },
-        { value: "back", label: t.muted("back to menu") },
-      ],
-    });
-
-    if (p.isCancel(action) || action === "back") return;
-
-    if (action === "again") continue;
-
-    if (typeof action === "string" && action.startsWith("open:")) {
-      const idx = parseInt(action.slice(5), 10);
-      const target = data.results[idx];
-      if (target) openUrl(target.url);
-    }
+    const action = await browseResults(data);
+    if (action === "back") return;
   }
 };

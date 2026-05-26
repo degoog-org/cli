@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises"
+import { mkdir, writeFile, access } from "node:fs/promises"
 import { join, resolve, dirname } from "node:path"
 import { logger } from "./logger.ts"
 import type { Config } from "../types/index.ts"
@@ -6,6 +6,15 @@ import { HTMLBundle } from "bun"
 
 export const mkdirp = async (dir: string) => {
   await mkdir(dir, { recursive: true })
+}
+
+export const exists = async (path: string): Promise<boolean> => {
+  try {
+    await access(path)
+    return true
+  } catch {
+    return false
+  }
 }
 
 export const writeOut = async (filePath: string, content: string | HTMLBundle) => {

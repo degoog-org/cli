@@ -1,6 +1,7 @@
 import { readFile, writeFile, readdir } from "node:fs/promises"
 import { join, basename } from "node:path"
 import { exists } from "./detect.ts"
+import { findStoreRoot } from "../../utils/store.ts"
 import type { CheckResult, ExtensionKind, RunSummary } from "./types.ts"
 
 const readJson = async <T>(path: string): Promise<T | null> => {
@@ -279,9 +280,12 @@ export const runChecks = async (
     if (themeRes.failed) failed = true
   }
 
-  const authorRes = await checkAuthorJson(dir, doFix)
-  results.push(authorRes.result)
-  if (authorRes.failed) failed = true
+  const inStore = await findStoreRoot(dir)
+  if (!inStore) {
+    const authorRes = await checkAuthorJson(dir, doFix)
+    results.push(authorRes.result)
+    if (authorRes.failed) failed = true
+  }
 
   if (kind === "plugin") {
     const routeChecks = await checkRouteConventions(dir, doFix)

@@ -1,16 +1,9 @@
-import { access, readFile } from "node:fs/promises"
 import { join, basename, dirname } from "node:path"
-import type { ExtensionKind, StoreManifest, Target } from "./types.ts"
-import { EXTENSION_CATEGORIES } from "./types.ts"
+import { exists } from "../../utils/files.ts"
+import { readStoreManifest } from "../../utils/store.ts"
+import type { ExtensionKind, Target } from "./types.ts"
 
-export const exists = async (path: string): Promise<boolean> => {
-  try {
-    await access(path)
-    return true
-  } catch {
-    return false
-  }
-}
+export { exists }
 
 const KIND_FROM_FOLDER: Record<string, ExtensionKind> = {
   themes: "theme",
@@ -37,25 +30,10 @@ export const detectExtKind = async (dir: string): Promise<ExtensionKind> => {
   return detectKindFromParent(dir)
 }
 
-const readStoreManifest = async (
-  dir: string,
-): Promise<{ path: string; manifest: StoreManifest } | null> => {
-  const path = join(dir, "package.json")
-  if (!(await exists(path))) return null
-  try {
-    const manifest = JSON.parse(await readFile(path, "utf-8")) as StoreManifest
-    const hasAny = EXTENSION_CATEGORIES.some((c) => Array.isArray(manifest[c]))
-    if (!hasAny) return null
-    return { path, manifest }
-  } catch {
-    return null
-  }
-}
-
 export const detectTarget = async (dir: string): Promise<Target | null> => {
   const store = await readStoreManifest(dir)
   if (store) {
-    return { kind: "store", dir, manifestPath: store.path, manifest: store.manifest }
+    return { kind: "store", dir, manifestPath: store.manifestPath, manifest: store.manifest }
   }
   if (await isExtensionDir(dir)) {
     const extKind = await detectExtKind(dir)

@@ -1,4 +1,5 @@
 import * as p from "@clack/prompts";
+import { join } from "node:path";
 import { ExtType, type GeneratorCtx } from "../types/index.ts";
 import { promptExtType } from "../prompts/ext-type.ts";
 import { generateEngine } from "../generators/engine.ts";
@@ -13,6 +14,13 @@ import { generatePluginMid } from "../generators/plugin-mid.ts";
 import { generatePluginRoute } from "../generators/plugin-route.ts";
 import { loadConfig } from "../config/store.ts";
 import { argv } from "../utils/argv.ts";
+import {
+  extTypeToCategory,
+  findStoreRoot,
+  registerExtensionInStore,
+  scaffoldStore,
+} from "../utils/store.ts";
+import { t } from "../utils/theme.ts";
 
 const SLUG_RE = /^[a-z][a-z0-9-]*$/;
 
@@ -29,6 +37,43 @@ const GENERATORS: Record<ExtType, (ctx: GeneratorCtx) => Promise<string>> = {
   [ExtType.PluginIntercept]: generatePluginIntercept,
   [ExtType.PluginMiddleware]: generatePluginMid,
   [ExtType.PluginRoutes]: generatePluginRoute,
+};
+
+const resolveOutDir = async (
+  extType: ExtType,
+  config: Awaited<ReturnType<typeof loadConfig>>,
+): Promise<string | null> => {
+  if (argv.out) return argv.out;
+
+  const category = extTypeToCategory(extType);
+  let store = await findStoreRoot(process.cwd());
+
+  if (store) {
+    p.log.info(t.muted(`store detected — creating in ${category}/`));
+    return join(store.dir, category);
+  }
+
+  const setup = await p.confirm({
+    message: "No store detected. Set up a store in the current directory?",
+    initialValue: true,
+  });
+  if (p.isCancel(setup)) return null;
+
+  if (setup) {
+    await scaffoldStore(process.cwd(), config);
+    store = await findStoreRoot(process.cwd());
+    if (store) {
+      p.log.info(t.muted(`store created — creating in ${category}/`));
+      return join(store.dir, category);
+    }
+  }
+
+  const input = await p.text({
+    message: "Output directory",
+    placeholder: ".",
+  });
+  if (p.isCancel(input)) return null;
+  return input || ".";
 };
 
 export const createCmd = async () => {
@@ -60,23 +105,18 @@ export const createCmd = async () => {
     extType = picked
   }
 
-  let outDir: string
-
-  if (argv.out) {
-    outDir = argv.out
-  } else {
-    const input = await p.text({
-      message: "Output directory",
-      initialValue: ".",
-    })
-    if (p.isCancel(input)) return
-    outDir = input || "."
-  }
-
   const config = await loadConfig()
+  const outDir = await resolveOutDir(extType, config)
+  if (!outDir) return
+
   const ctx: GeneratorCtx = { name, outDir, config }
 
-  await GENERATORS[extType](ctx)
+  const createdPath = await GENERATORS[extType](ctx)
+
+  const store = await findStoreRoot(createdPath)
+  if (store) {
+    await registerExtensionInStore(store.dir, name, extType)
+  }
 
   p.note(
     `That's it, you now have a sexy template for your extension. Have fun making it your own!`,
