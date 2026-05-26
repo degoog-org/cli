@@ -20,8 +20,8 @@ const indexTpl = (name: string) => `export const interceptor = {
 
   async intercept(query: string, context: {
     fetch: typeof fetch
-  }): Promise<{ query: string }> {
-    // transform and return the modified query
+  }): Promise<{ query: string; overrides?: { searchType?: string; lang?: string; timeFilter?: string } }> {
+    // transform the query, and optionally override search params
     return { query }
   },
 }
