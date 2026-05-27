@@ -1,8 +1,8 @@
-import { scaffoldDir, authorJsonTpl, readmeTpl } from "../utils/files.ts"
-import type { GeneratorCtx } from "../types/index.ts"
+import { scaffoldDir, authorJsonTpl, readmeTpl } from "../utils/files.ts";
+import type { GeneratorCtx } from "../types/index.ts";
 
 const indexTpl = (name: string) => `export const name = "${name}"
-export const type = "web" // web | images | videos | news | custom
+export const type = "web" // string or array - e.g. "web", "books", ["web", "any-type"]
 export const bangShortcut = "${name}"
 
 // settingsSchema example:
@@ -56,11 +56,11 @@ export const executeSearch = async (
     return []
   }
 }
-`
+`;
 
 export const generateEngine = async (ctx: GeneratorCtx) =>
   scaffoldDir(ctx.outDir, ctx.name, {
     "index.ts": indexTpl(ctx.name),
     "README.md": readmeTpl(ctx.name, "A custom search engine for degoog."),
     "author.json": authorJsonTpl(ctx.config),
-  })
+  });
