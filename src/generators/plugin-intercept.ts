@@ -1,7 +1,19 @@
 import { scaffoldDir, authorJsonTpl, readmeTpl } from "../utils/files.ts"
 import type { GeneratorCtx } from "../types/index.ts"
 
-const indexTpl = (name: string) => `export const interceptor = {
+const indexTpl = (name: string) => `// If this file also exports a slot or command and you want a single settings
+// card for all of them, add a top-level plugin identity export:
+//
+// export const plugin = {
+//   id: "${name}",
+//   name: "${name}",
+//   description: "...",
+//   settingsSchema: [ /* shared fields */ ],
+// };
+//
+// All hooks in this file will share that id and appear as one card in settings.
+
+export const interceptor = {
   name: "${name}",
   description: "Modifies queries before search",
 

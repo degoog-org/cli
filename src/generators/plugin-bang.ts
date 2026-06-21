@@ -1,7 +1,19 @@
 import { scaffoldDir, authorJsonTpl, readmeTpl } from "../utils/files.ts"
 import type { GeneratorCtx } from "../types/index.ts"
 
-const indexTpl = (name: string) => `export default {
+const indexTpl = (name: string) => `// If this file also exports other hooks (slot, interceptor, tab, etc.) and
+// you want a single settings card for all of them, add a top-level plugin identity:
+//
+// export const plugin = {
+//   id: "${name}",
+//   name: "${name}",
+//   description: "...",
+//   settingsSchema: [ /* shared fields */ ],
+// };
+//
+// All hooks in this file will share that id and appear as one card in settings.
+
+export default {
   name: "${name}",
   description: "${name} bang command",
   trigger: "${name}",
@@ -19,6 +31,17 @@ const indexTpl = (name: string) => `export default {
 
   // settingsSchema: [
   //   { key: "apiKey", label: "API Key", type: "password", required: true },
+  //   // A "list" field lets users manage a repeatable list of structured rows.
+  //   // The value arrives in configure() as a JSON array string; JSON.parse it.
+  //   // {
+  //   //   key: "bangs", label: "Custom bangs", type: "list", addLabel: "+ Add bang",
+  //   //   itemSchema: [
+  //   //     { key: "shortcut", label: "Shortcut", type: "text" },
+  //   //     // URL templates can use {{{s}}} or %s where the query goes.
+  //   //     { key: "url", label: "URL template", type: "text" },
+  //   //     { key: "openBase", label: "Open base path", type: "toggle" },
+  //   //   ],
+  //   // },
   // ],
   //
   // configure(settings) {},
