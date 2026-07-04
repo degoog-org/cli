@@ -22,6 +22,8 @@ export const interceptor = {
   // ],
   //
   // configure(settings) {},
+  // needsAppRestart: true, // set true if this interceptor needs a server restart to work (e.g. registers a WebSocket route)
+  //
   // async init(ctx) {
   //   ctx.pluginId // installed plugin folder ID assigned by degoog (alias: ctx.id)
   //   ctx.apiBase  // /api/plugin/<ctx.pluginId> - base for your own routes

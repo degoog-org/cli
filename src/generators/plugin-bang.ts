@@ -45,6 +45,7 @@ export default {
   // ],
   //
   // configure(settings) {},
+  // needsAppRestart: true, // set true if this command needs a server restart to work (e.g. registers a WebSocket route)
   //
   // async init(ctx) {
   //   ctx.template // template.html contents

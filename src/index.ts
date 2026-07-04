@@ -47,7 +47,7 @@ const main = async () => {
     }
 
     if (action === "update" && newVersion) {
-      p.outro(`run: ${t.brand(updateCmd(newVersion))}`)
+      p.outro(`run: ${t.brand(updateCmd())}`)
       process.exit(0)
     }
     if (action === "login") await loginCmd()

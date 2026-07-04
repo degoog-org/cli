@@ -17,6 +17,8 @@ export const middleware = {
   id: "${name}",
   name: "${name}",
 
+  // needsAppRestart: true, // set true if this middleware needs a server restart to work (e.g. registers a WebSocket route)
+
   async handle(req: Request, context: {
     fetch: typeof fetch
   }): Promise<Response | { redirect: string } | null> {

@@ -33,6 +33,8 @@ export const tab = {
   // ],
   //
   // configure(settings) {},
+  // needsAppRestart: true, // set true if this tab needs a server restart to work (e.g. registers a WebSocket route)
+  //
   // async init(ctx) {
   //   ctx.template // template.html contents
   //   ctx.pluginId // installed plugin folder ID assigned by degoog (alias: ctx.id)

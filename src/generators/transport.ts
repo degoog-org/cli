@@ -1,40 +1,43 @@
 import { scaffoldDir, authorJsonTpl, readmeTpl } from "../utils/files.ts"
 import type { GeneratorCtx } from "../types/index.ts"
 
-const indexTpl = (name: string) => `export const name = "${name}"
-export const displayName = "${name}"
-export const description = "Custom transport for degoog"
+const indexTpl = (name: string) => `export const transport = {
+  name: "${name}",
+  displayName: "${name}",
+  description: "Custom transport for degoog",
 
-// settingsSchema example:
-// export const settingsSchema = [
-//   { key: "proxyUrl", label: "Proxy URL", type: "url", required: true },
-// ]
-//
-// export const configure = (settings) => {
-//   // called after settings save and on server restart
-// }
+  // settingsSchema: [
+  //   { key: "proxyUrl", label: "Proxy URL", type: "url", required: true },
+  // ],
+  //
+  // configure(settings) {
+  //   // called after settings save and on server restart
+  // },
+  //
+  // needsAppRestart: true, // set true if this transport needs a server restart to work (e.g. registers a WebSocket route)
 
-export const available = async (): Promise<boolean> => {
-  // return true if this transport is ready to use
-  return true
-}
-
-export const fetch = async (
-  url: string,
-  options: {
-    method?: string
-    headers?: Record<string, string>
-    body?: string
-    redirect?: RequestRedirect
-    signal?: AbortSignal
+  async available(): Promise<boolean> {
+    // return true if this transport is ready to use
+    return true
   },
-  context: {
-    proxyUrl?: string
-    fetch: typeof globalThis.fetch
-  }
-): Promise<Response> => {
-  // TODO: implement transport logic
-  return context.fetch(url, options)
+
+  async fetch(
+    url: string,
+    options: {
+      method?: string
+      headers?: Record<string, string>
+      body?: string
+      redirect?: RequestRedirect
+      signal?: AbortSignal
+    },
+    context: {
+      proxyUrl?: string
+      fetch: typeof globalThis.fetch
+    }
+  ): Promise<Response> {
+    // TODO: implement transport logic
+    return context.fetch(url, options)
+  },
 }
 `
 
