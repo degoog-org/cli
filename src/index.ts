@@ -42,7 +42,7 @@ const main = async () => {
     const action = await p.select({ message: t.muted("what do you want to do?"), options })
 
     if (p.isCancel(action) || action === "exit") {
-      p.outro(t.muted("bye"))
+      p.outro(t.muted("bye :C"))
       process.exit(0)
     }
 
