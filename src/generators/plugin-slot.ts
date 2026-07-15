@@ -13,7 +13,9 @@ const indexTpl = (name: string) => `// If this file also exports other hooks (in
 //
 // All hooks in this file will share that id and appear as one card in settings.
 
-// positions: above-results | below-results | above-sidebar | below-sidebar | knowledge-panel | at-a-glance
+// positions: above-results | below-results | full-width-above-results | above-sidebar | below-sidebar | knowledge-panel | at-a-glance
+// full-width-above-results renders above the whole results layout at full content width.
+// degoog only supplies the shared width and horizontal padding, so all other styling is yours.
 export const slot = {
   id: "${name}",
   name: "${name}",
