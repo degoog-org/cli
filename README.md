@@ -100,6 +100,8 @@ Every extension gets:
 
 Themes also get `style.css` with all CSS variables pre-filled to the degoog defaults (light and dark), plus a `templates/logo.html` example showing how to override a template section.
 
+The generated theme README also covers the script-free `/nojs` page, which reuses your ordinary templates and takes per-file overrides from a `nojs/` folder by filename instead of through `theme.json`.
+
 Plugin types also have `isClientExposed` already in the template. Set it to `true` if your plugin causes the browser to fetch external URLs directly, `false` if everything goes through the server. Leaving it unset shows a warning badge in degoog settings.
 
 ## Docker Compose
