@@ -1,7 +1,13 @@
 import { stat } from "node:fs/promises"
 import { join } from "node:path"
 import { exists } from "./detect"
-import type { CheckResult, ExtensionCategory, StoreEntry, StoreManifest } from "./types"
+import {
+  CHALLENGES_MIN_DEGOOG_VERSION,
+  type CheckResult,
+  type ExtensionCategory,
+  type StoreEntry,
+  type StoreManifest,
+} from "./types"
 
 export const validateTopLevel = (manifest: StoreManifest): CheckResult[] => {
   const results: CheckResult[] = []
@@ -121,4 +127,40 @@ export const validatePathExistence = async (
   }
 
   return { results, toRemove }
+}
+
+const versionParts = (version: string): number[] =>
+  (version.trim().replace(/^v/, "").split("-")[0] ?? "")
+    .split(".")
+    .map((part) => Number.parseInt(part, 10) || 0)
+
+export const isVersionAtLeast = (version: string, minimum: string): boolean => {
+  const have = versionParts(version)
+  const want = versionParts(minimum)
+  for (let i = 0; i < Math.max(have.length, want.length); i++) {
+    const a = have[i] ?? 0
+    const b = want[i] ?? 0
+    if (a !== b) return a > b
+  }
+  return true
+}
+
+export const validateChallengesMinVersion = (entry: StoreEntry): CheckResult => {
+  const label = `package.json minDegoogVersion >= ${CHALLENGES_MIN_DEGOOG_VERSION}`
+  const v = entry.minDegoogVersion
+  if (typeof v !== "string" || v.trim() === "") {
+    return {
+      label,
+      status: "warn",
+      detail: `missing - engines that set "challenges" need degoog ${CHALLENGES_MIN_DEGOOG_VERSION} or newer`,
+    }
+  }
+  if (!isVersionAtLeast(v, CHALLENGES_MIN_DEGOOG_VERSION)) {
+    return {
+      label,
+      status: "warn",
+      detail: `set to ${v} - engines that set "challenges" need degoog ${CHALLENGES_MIN_DEGOOG_VERSION} or newer`,
+    }
+  }
+  return { label, status: "pass" }
 }

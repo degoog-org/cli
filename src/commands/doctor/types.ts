@@ -32,6 +32,10 @@ export const PLUGIN_TYPES = ["command", "slot", "interceptor", "search-result-ta
 
 export type PluginType = typeof PLUGIN_TYPES[number]
 
+export const ENGINE_CHALLENGES: readonly string[] = ["anubis"]
+
+export const CHALLENGES_MIN_DEGOOG_VERSION = "1.0.0"
+
 export type StoreEntry = {
   path?: string
   name?: string

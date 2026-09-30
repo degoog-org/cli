@@ -16,6 +16,9 @@ export type GeneratorCtx = {
   name: string
   outDir: string
   config: Config
+  challenges?: boolean
+  handlesChallenges?: boolean
+  themeParts?: string[]
 }
 
 export type Config = {

@@ -1,6 +1,7 @@
 import { readFile, writeFile } from "node:fs/promises"
 import { join, basename, dirname, resolve } from "node:path"
 import {
+  CHALLENGES_MIN_DEGOOG_VERSION,
   EXTENSION_CATEGORIES,
   type ExtensionCategory,
   type PluginType,
@@ -67,7 +68,11 @@ const EXT_TYPE_PLUGIN_TYPE: Partial<Record<ExtType, PluginType>> = {
   [ExtType.PluginIntercept]: "interceptor",
 }
 
-export const buildStoreEntry = (name: string, extType: ExtType): StoreEntry => {
+export const buildStoreEntry = (
+  name: string,
+  extType: ExtType,
+  challenges = false,
+): StoreEntry => {
   const category = extTypeToCategory(extType)
   const entry: StoreEntry = {
     path: `${category}/${name}`,
@@ -78,6 +83,9 @@ export const buildStoreEntry = (name: string, extType: ExtType): StoreEntry => {
   if (category === "plugins") {
     entry.type = EXT_TYPE_PLUGIN_TYPE[extType] ?? "command"
   }
+  if (extType === ExtType.Engine && challenges) {
+    entry.minDegoogVersion = CHALLENGES_MIN_DEGOOG_VERSION
+  }
   return entry
 }
 
@@ -85,12 +93,13 @@ export const registerExtensionInStore = async (
   storeDir: string,
   name: string,
   extType: ExtType,
+  challenges = false,
 ): Promise<void> => {
   const store = await readStoreManifest(storeDir)
   if (!store) return
 
   const category = extTypeToCategory(extType)
-  const entry = buildStoreEntry(name, extType)
+  const entry = buildStoreEntry(name, extType, challenges)
   const manifest = { ...store.manifest }
   const existing = manifest[category]
   const list = Array.isArray(existing) ? [...(existing as StoreEntry[])] : []

@@ -1,15 +1,16 @@
 import { writeFile } from "node:fs/promises"
 import { join, basename } from "node:path"
-import * as p from "@clack/prompts"
 import { t } from "../../utils/theme"
+import { ui } from "../../utils/ui"
 import { exists } from "./detect"
-import { runChecks } from "./checks"
+import { declaresChallenges, runChecks } from "./checks"
 import { printResults } from "./report"
 import {
   validateTopLevel,
   validateEntry,
   validatePathExistence,
   findDuplicateEntries,
+  validateChallengesMinVersion,
 } from "./store-validate"
 import { collectOrphans, resolveOrphans } from "./store-orphans"
 import {
@@ -35,7 +36,7 @@ const tallyResults = (results: CheckResult[], summary: StoreRunSummary): void =>
 }
 
 const sectionHeader = (label: string): void => {
-  p.log.step(t.brand(label))
+  ui.step(t.brand(label))
 }
 
 const collectEntryIssues = async (
@@ -85,12 +86,13 @@ const processCategory = async (
 const handleOrphans = async (
   storeDir: string,
   manifest: StoreManifest,
+  doFix: boolean,
   summary: StoreRunSummary,
 ): Promise<boolean> => {
   const orphans = await collectOrphans(storeDir, manifest)
   if (orphans.length === 0) return false
 
-  const resolution = await resolveOrphans(orphans)
+  const resolution = await resolveOrphans(orphans, doFix)
   summary.fixed += resolution.added
   summary.failed += resolution.skipped
 
@@ -122,6 +124,9 @@ const runExtensionChecks = async (
 
       sectionHeader(`${category}/${basename(entry.path)}`)
       const { results } = await runChecks(full, doFix, kind)
+      if (kind === "engine" && (await declaresChallenges(full))) {
+        results.push(validateChallengesMinVersion(entry))
+      }
       printResults(results)
       tallyResults(results, summary)
     }
@@ -147,7 +152,7 @@ export const runStoreChecks = async (
     if (changed) manifestMutated = true
   }
 
-  const addedOrphans = await handleOrphans(storeDir, manifest, summary)
+  const addedOrphans = await handleOrphans(storeDir, manifest, doFix, summary)
   if (addedOrphans) manifestMutated = true
 
   if (manifestMutated) {

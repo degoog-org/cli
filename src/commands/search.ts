@@ -2,6 +2,8 @@ import * as p from "@clack/prompts";
 import { loadConfig } from "../config/store";
 import { apiGet } from "../utils/api";
 import { t } from "../utils/theme";
+import { argv, positionalsAfter } from "../utils/argv";
+import { isHeadless, fail } from "../utils/headless";
 
 type Result = {
   title: string;
@@ -19,9 +21,15 @@ type SearchResp = {
 const PAGE_SIZE = 10;
 
 const parseSearchQuery = (): string | undefined => {
-  const argStart = process.argv[2] === "search" ? 3 : 2;
-  const args = process.argv.slice(argStart).filter((a) => !a.startsWith("-"));
+  const args = positionalsAfter("search");
   return args.length ? args.join(" ") : undefined;
+};
+
+const parseLimit = (): number | undefined => {
+  if (argv.limit === undefined) return undefined;
+  const n = Number(argv.limit);
+  if (!Number.isInteger(n) || n < 1) fail(`invalid --limit "${argv.limit}"`);
+  return n;
 };
 
 const openUrl = (url: string) => {
@@ -56,25 +64,22 @@ const truncate = (s: string, max: number) =>
 
 const totalPages = (count: number) => Math.max(1, Math.ceil(count / PAGE_SIZE));
 
-const renderResults = (
+const renderResultList = (
   data: SearchResp,
-  page: number,
+  results: Result[],
+  start: number,
+  header: string,
   showRelated: boolean,
 ) => {
   const cols = process.stdout.columns ?? 100;
   const maxWidth = Math.min(cols - 8, 90);
   const pad = "      ";
-  const pages = totalPages(data.results.length);
-  const start = (page - 1) * PAGE_SIZE;
-  const pageResults = data.results.slice(start, start + PAGE_SIZE);
 
   console.log();
-  console.log(
-    `  ${t.muted(`page ${page}/${pages} · ${data.results.length} results · ${data.totalTime}ms`)}`,
-  );
+  console.log(`  ${t.muted(header)}`);
   console.log();
 
-  pageResults.forEach((r, i) => {
+  results.forEach((r, i) => {
     const num = t.dim(`  ${String(start + i + 1).padStart(2)}  `);
     console.log(`${num}${t.bold(t.brand(truncate(r.title, maxWidth)))}`);
     console.log(`${pad}${t.success(truncate(r.url, maxWidth))}`);
@@ -99,6 +104,22 @@ const renderResults = (
     console.log(`  ${t.muted("related:")}  ${related}`);
     console.log();
   }
+};
+
+const renderResults = (
+  data: SearchResp,
+  page: number,
+  showRelated: boolean,
+) => {
+  const pages = totalPages(data.results.length);
+  const start = (page - 1) * PAGE_SIZE;
+  renderResultList(
+    data,
+    data.results.slice(start, start + PAGE_SIZE),
+    start,
+    `page ${page}/${pages} · ${data.results.length} results · ${data.totalTime}ms`,
+    showRelated,
+  );
 };
 
 const doSearch = async (
@@ -183,8 +204,50 @@ const browseResults = async (data: SearchResp): Promise<"again" | "back"> => {
   }
 };
 
+const searchHeadless = async (
+  query: string | undefined,
+  config: Awaited<ReturnType<typeof loadConfig>>,
+) => {
+  if (!config.instanceUrl) {
+    return fail("no instance configured - run: degoog-cli login --instance-url <url>");
+  }
+  if (!query) return fail("a query is required: degoog-cli search <query>");
+
+  const limit = parseLimit();
+  const result = await apiGet<SearchResp>(
+    config,
+    `/api/search?q=${encodeURIComponent(query)}`,
+  );
+  if (!result.ok) return fail(result.error);
+
+  const data = result.data;
+  const results = limit ? data.results.slice(0, limit) : data.results;
+
+  if (argv.json) {
+    console.log(JSON.stringify({ ...data, results }, null, 2));
+    return;
+  }
+
+  if (!results.length) {
+    console.log(t.muted("no results found"));
+    return;
+  }
+
+  renderResultList(
+    data,
+    results,
+    0,
+    `${results.length} of ${data.results.length} results · ${data.totalTime}ms`,
+    true,
+  );
+};
+
 export const searchCmd = async () => {
   const config = await loadConfig();
+
+  if (isHeadless || argv.json) {
+    return searchHeadless(parseSearchQuery(), config);
+  }
 
   if (!config.instanceUrl) {
     p.log.warn(t.warning("no instance configured - run Login / Setup first"));

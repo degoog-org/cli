@@ -1,11 +1,11 @@
 import { scaffoldDir, authorJsonTpl, readmeTpl } from "../utils/files"
 import type { GeneratorCtx } from "../types"
 
-const indexTpl = (name: string) => `export const transport = {
+const indexTpl = (name: string, handlesChallenges: boolean) => `export const transport = {
   name: "${name}",
   displayName: "${name}",
   description: "Custom transport for degoog",
-
+${handlesChallenges ? `  handlesChallenges: true,\n` : ""}
   // settingsSchema: [
   //   { key: "proxyUrl", label: "Proxy URL", type: "url", required: true },
   // ],
@@ -43,7 +43,7 @@ const indexTpl = (name: string) => `export const transport = {
 
 export const generateTransport = async (ctx: GeneratorCtx) =>
   scaffoldDir(ctx.outDir, ctx.name, {
-    "index.ts": indexTpl(ctx.name),
+    "index.ts": indexTpl(ctx.name, ctx.handlesChallenges ?? false),
     "README.md": readmeTpl(ctx.name, "A custom HTTP transport for degoog."),
     "author.json": authorJsonTpl(ctx.config),
   })

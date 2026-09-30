@@ -2,7 +2,7 @@ import { readFile, writeFile, readdir } from "node:fs/promises"
 import { join, basename } from "node:path"
 import { exists } from "./detect"
 import { findStoreRoot } from "../../utils/store"
-import type { CheckResult, ExtensionKind, RunSummary } from "./types"
+import { ENGINE_CHALLENGES, type CheckResult, type ExtensionKind, type RunSummary } from "./types"
 
 const readJson = async <T>(path: string): Promise<T | null> => {
   try {
@@ -182,6 +182,74 @@ const checkRouteConventions = async (dir: string, doFix: boolean): Promise<Check
   return results
 }
 
+const ENTRY_FILES = ["index.ts", "index.js"]
+const CHALLENGES_RE = /(?<![.\w$])challenges\s*[:=]\s*(\[[^\]]*\]|[^\s,;}]+)/
+const HANDLES_CHALLENGES_RE = /(?<![.\w$])handlesChallenges\s*[:=]\s*([^\s,;}]+)/
+const STRING_LITERAL_RE = /^(["'`])([^"'`]*)\1$/
+
+const readEntrySource = async (dir: string): Promise<string | null> => {
+  for (const file of ENTRY_FILES) {
+    try {
+      return await readFile(join(dir, file), "utf-8")
+    } catch {
+      continue
+    }
+  }
+  return null
+}
+
+export const checkChallengesValue = (raw: string): CheckResult => {
+  const label = '"challenges" is valid'
+  if (!raw.startsWith("[")) {
+    return { label, status: "fail", detail: 'must be an array, e.g. ["anubis"]' }
+  }
+  const items = raw
+    .slice(1, -1)
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean)
+  const unknown = items.filter((item) => {
+    const kind = STRING_LITERAL_RE.exec(item)?.[2]
+    return kind === undefined || !ENGINE_CHALLENGES.includes(kind)
+  })
+  if (unknown.length > 0) {
+    return {
+      label,
+      status: "fail",
+      detail: `unknown kind ${unknown.join(", ")} - supported: ${ENGINE_CHALLENGES.map((k) => `"${k}"`).join(", ")}`,
+    }
+  }
+  return { label, status: "pass" }
+}
+
+export const checkHandlesChallengesValue = (raw: string): CheckResult => {
+  const label = '"handlesChallenges" is valid'
+  if (raw === "true" || raw === "false") return { label, status: "pass" }
+  return { label, status: "fail", detail: `must be true or false, got ${raw}` }
+}
+
+export const declaresChallenges = async (dir: string): Promise<boolean> => {
+  const src = await readEntrySource(dir)
+  return src !== null && CHALLENGES_RE.test(src)
+}
+
+const checkChallengeProps = async (
+  dir: string,
+  kind: ExtensionKind,
+): Promise<CheckResult[]> => {
+  const src = await readEntrySource(dir)
+  if (src === null) return []
+  if (kind === "engine") {
+    const raw = CHALLENGES_RE.exec(src)?.[1]
+    return raw === undefined ? [] : [checkChallengesValue(raw)]
+  }
+  if (kind === "transport") {
+    const raw = HANDLES_CHALLENGES_RE.exec(src)?.[1]
+    return raw === undefined ? [] : [checkHandlesChallengesValue(raw)]
+  }
+  return []
+}
+
 const runThemeChecks = async (dir: string, doFix: boolean): Promise<RunSummary> => {
   const results: CheckResult[] = []
   let failed = false
@@ -285,6 +353,12 @@ export const runChecks = async (
     const authorRes = await checkAuthorJson(dir, doFix)
     results.push(authorRes.result)
     if (authorRes.failed) failed = true
+  }
+
+  if (kind === "engine" || kind === "transport") {
+    const challengeChecks = await checkChallengeProps(dir, kind)
+    results.push(...challengeChecks)
+    if (challengeChecks.some((c) => c.status === "fail")) failed = true
   }
 
   if (kind === "plugin") {
