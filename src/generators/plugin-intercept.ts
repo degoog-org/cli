@@ -1,5 +1,5 @@
-import { scaffoldDir, authorJsonTpl, readmeTpl } from "../utils/files.ts"
-import type { GeneratorCtx } from "../types/index.ts"
+import { scaffoldDir, authorJsonTpl, readmeTpl } from "../utils/files"
+import type { GeneratorCtx } from "../types"
 
 const indexTpl = (name: string) => `// If this file also exports a slot or command and you want a single settings
 // card for all of them, add a top-level plugin identity export:

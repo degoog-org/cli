@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts"
-import { t } from "./theme.ts"
+import { t } from "./theme"
 import { Option } from "@clack/prompts"
 
 const exitCancelled = (): never => {

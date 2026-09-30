@@ -6,10 +6,10 @@ import {
   type PluginType,
   type StoreEntry,
   type StoreManifest,
-} from "../commands/doctor/types.ts"
-import { ExtType, type Config } from "../types/index.ts"
-import { exists, mkdirp } from "./files.ts"
-import { logger } from "./logger.ts"
+} from "../commands/doctor/types"
+import { ExtType, type Config } from "../types"
+import { exists, mkdirp } from "./files"
+import { logger } from "./logger"
 
 export type StoreRoot = {
   dir: string
@@ -47,6 +47,7 @@ const EXT_TYPE_CATEGORY: Record<ExtType, ExtensionCategory> = {
   [ExtType.Engine]: "engines",
   [ExtType.Transport]: "transports",
   [ExtType.Autocomplete]: "autocomplete",
+  [ExtType.Favicon]: "favicon",
   [ExtType.Theme]: "themes",
   [ExtType.PluginBang]: "plugins",
   [ExtType.PluginSlot]: "plugins",
@@ -114,6 +115,7 @@ export const scaffoldStore = async (dir: string, config: Config): Promise<void> 
     engines: [],
     transports: [],
     autocomplete: [],
+    favicon: [],
   }
 
   const manifestPath = join(resolved, "package.json")

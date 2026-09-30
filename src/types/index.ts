@@ -2,6 +2,7 @@ export enum ExtType {
   Engine = "engine",
   Transport = "transport",
   Autocomplete = "autocomplete",
+  Favicon = "favicon",
   Theme = "theme",
   PluginBang = "plugin-bang",
   PluginSlot = "plugin-slot",

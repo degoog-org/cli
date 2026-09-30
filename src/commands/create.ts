@@ -1,26 +1,27 @@
 import * as p from "@clack/prompts";
 import { join } from "node:path";
-import { ExtType, type GeneratorCtx } from "../types/index.ts";
-import { promptExtType } from "../prompts/ext-type.ts";
-import { generateEngine } from "../generators/engine.ts";
-import { generateTransport } from "../generators/transport.ts";
-import { generateAutocomplete } from "../generators/autocomplete.ts";
-import { generateTheme } from "../generators/theme.ts";
-import { generatePluginBang } from "../generators/plugin-bang.ts";
-import { generatePluginSlot } from "../generators/plugin-slot.ts";
-import { generatePluginTab } from "../generators/plugin-tab.ts";
-import { generatePluginIntercept } from "../generators/plugin-intercept.ts";
-import { generatePluginMid } from "../generators/plugin-mid.ts";
-import { generatePluginRoute } from "../generators/plugin-route.ts";
-import { loadConfig } from "../config/store.ts";
-import { argv } from "../utils/argv.ts";
+import { ExtType, type GeneratorCtx } from "../types";
+import { promptExtType } from "../prompts/ext-type";
+import { generateEngine } from "../generators/engine";
+import { generateTransport } from "../generators/transport";
+import { generateAutocomplete } from "../generators/autocomplete";
+import { generateFavicon } from "../generators/favicon";
+import { generateTheme } from "../generators/theme";
+import { generatePluginBang } from "../generators/plugin-bang";
+import { generatePluginSlot } from "../generators/plugin-slot";
+import { generatePluginTab } from "../generators/plugin-tab";
+import { generatePluginIntercept } from "../generators/plugin-intercept";
+import { generatePluginMid } from "../generators/plugin-mid";
+import { generatePluginRoute } from "../generators/plugin-route";
+import { loadConfig } from "../config/store";
+import { argv } from "../utils/argv";
 import {
   extTypeToCategory,
   findStoreRoot,
   registerExtensionInStore,
   scaffoldStore,
-} from "../utils/store.ts";
-import { t } from "../utils/theme.ts";
+} from "../utils/store";
+import { t } from "../utils/theme";
 
 const SLUG_RE = /^[a-z][a-z0-9-]*$/;
 
@@ -30,6 +31,7 @@ const GENERATORS: Record<ExtType, (ctx: GeneratorCtx) => Promise<string>> = {
   [ExtType.Engine]: generateEngine,
   [ExtType.Transport]: generateTransport,
   [ExtType.Autocomplete]: generateAutocomplete,
+  [ExtType.Favicon]: generateFavicon,
   [ExtType.Theme]: generateTheme,
   [ExtType.PluginBang]: generatePluginBang,
   [ExtType.PluginSlot]: generatePluginSlot,

@@ -1,10 +1,10 @@
 import * as p from "@clack/prompts"
-import { loginCmd } from "./commands/login.ts"
-import { createCmd } from "./commands/create.ts"
-import { searchCmd } from "./commands/search.ts"
-import { doctorCmd } from "./commands/doctor/index.ts"
-import { title, t } from "./utils/theme.ts"
-import { checkLatest, VERSION, updateCmd } from "./utils/version.ts"
+import { loginCmd } from "./commands/login"
+import { createCmd } from "./commands/create"
+import { searchCmd } from "./commands/search"
+import { doctorCmd } from "./commands/doctor"
+import { title, t } from "./utils/theme"
+import { checkLatest, VERSION, updateCmd } from "./utils/version"
 
 const SUBCOMMANDS: Record<string, () => Promise<void>> = {
   create: async () => { await createCmd() },

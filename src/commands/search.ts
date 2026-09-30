@@ -1,7 +1,7 @@
 import * as p from "@clack/prompts";
-import { loadConfig } from "../config/store.ts";
-import { apiGet } from "../utils/api.ts";
-import { t } from "../utils/theme.ts";
+import { loadConfig } from "../config/store";
+import { apiGet } from "../utils/api";
+import { t } from "../utils/theme";
 
 type Result = {
   title: string;

@@ -1,17 +1,17 @@
 import { writeFile } from "node:fs/promises"
 import { join, basename } from "node:path"
 import * as p from "@clack/prompts"
-import { t } from "../../utils/theme.ts"
-import { exists } from "./detect.ts"
-import { runChecks } from "./checks.ts"
-import { printResults } from "./report.ts"
+import { t } from "../../utils/theme"
+import { exists } from "./detect"
+import { runChecks } from "./checks"
+import { printResults } from "./report"
 import {
   validateTopLevel,
   validateEntry,
   validatePathExistence,
   findDuplicateEntries,
-} from "./store-validate.ts"
-import { collectOrphans, resolveOrphans } from "./store-orphans.ts"
+} from "./store-validate"
+import { collectOrphans, resolveOrphans } from "./store-orphans"
 import {
   EXTENSION_CATEGORIES,
   CATEGORY_TO_KIND,
@@ -20,7 +20,7 @@ import {
   type StoreEntry,
   type StoreManifest,
   type StoreRunSummary,
-} from "./types.ts"
+} from "./types"
 
 const writeManifest = async (path: string, manifest: StoreManifest): Promise<void> => {
   await writeFile(path, JSON.stringify(manifest, null, 2) + "\n", "utf-8")

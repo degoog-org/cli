@@ -1,8 +1,8 @@
 import { readFile, writeFile, readdir } from "node:fs/promises"
 import { join, basename } from "node:path"
-import { exists } from "./detect.ts"
-import { findStoreRoot } from "../../utils/store.ts"
-import type { CheckResult, ExtensionKind, RunSummary } from "./types.ts"
+import { exists } from "./detect"
+import { findStoreRoot } from "../../utils/store"
+import type { CheckResult, ExtensionKind, RunSummary } from "./types"
 
 const readJson = async <T>(path: string): Promise<T | null> => {
   try {

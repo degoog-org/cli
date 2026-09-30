@@ -82,6 +82,7 @@ Any flag you omit will still be asked interactively. Available types:
 | `engine`            | Custom search engine                                        |
 | `transport`         | Custom HTTP fetch strategy                                  |
 | `autocomplete`      | Search suggestions provider                                 |
+| `favicon`           | Favicon provider for search results                         |
 | `theme`             | UI theme with CSS variables and optional template overrides |
 | `plugin-bang`       | Bang command (`!trigger query`)                             |
 | `plugin-slot`       | Panel injected into search results                          |
@@ -94,7 +95,7 @@ Any flag you omit will still be asked interactively. Available types:
 
 Every extension gets:
 
-- `index.ts` - entry file pre-filled with the correct contract for the type you picked
+- `index.ts` - entry file pre-filled with the correct contract for the type you picked (favicon providers get `index.js`, matching the official store)
 - `README.md` - fill this in, it shows as docs on the extension's settings page
 - `author.json` - auto-filled from your login details
 

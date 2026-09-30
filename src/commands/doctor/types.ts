@@ -6,9 +6,9 @@ export type CheckResult = {
   detail?: string | undefined
 }
 
-export type ExtensionKind = "theme" | "plugin" | "engine" | "transport" | "autocomplete" | "unknown"
+export type ExtensionKind = "theme" | "plugin" | "engine" | "transport" | "autocomplete" | "favicon" | "unknown"
 
-export type ExtensionCategory = "themes" | "plugins" | "engines" | "transports" | "autocomplete"
+export type ExtensionCategory = "themes" | "plugins" | "engines" | "transports" | "autocomplete" | "favicon"
 
 export const EXTENSION_CATEGORIES: ExtensionCategory[] = [
   "plugins",
@@ -16,6 +16,7 @@ export const EXTENSION_CATEGORIES: ExtensionCategory[] = [
   "engines",
   "transports",
   "autocomplete",
+  "favicon",
 ]
 
 export const CATEGORY_TO_KIND: Record<ExtensionCategory, Exclude<ExtensionKind, "unknown">> = {
@@ -24,6 +25,7 @@ export const CATEGORY_TO_KIND: Record<ExtensionCategory, Exclude<ExtensionKind, 
   engines: "engine",
   transports: "transport",
   autocomplete: "autocomplete",
+  favicon: "favicon",
 }
 
 export const PLUGIN_TYPES = ["command", "slot", "interceptor", "search-result-tab"] as const
@@ -50,6 +52,7 @@ export type StoreManifest = {
   engines?: StoreEntry[]
   transports?: StoreEntry[]
   autocomplete?: StoreEntry[]
+  favicon?: StoreEntry[]
 } & Record<string, unknown>
 
 export type Target =

@@ -1,11 +1,11 @@
 import { readdir, stat } from "node:fs/promises"
 import { join, basename } from "node:path"
 import * as p from "@clack/prompts"
-import { t } from "../../utils/theme.ts"
-import { promptConfirm, promptSelect } from "../../utils/prompts.ts"
-import { exists } from "./detect.ts"
-import type { ExtensionCategory, StoreEntry } from "./types.ts"
-import { PLUGIN_TYPES, type PluginType } from "./types.ts"
+import { t } from "../../utils/theme"
+import { promptConfirm, promptSelect } from "../../utils/prompts"
+import { exists } from "./detect"
+import type { ExtensionCategory, StoreEntry } from "./types"
+import { EXTENSION_CATEGORIES, PLUGIN_TYPES, type PluginType } from "./types"
 
 export type Orphan = {
   category: ExtensionCategory
@@ -55,8 +55,7 @@ export const collectOrphans = async (
   manifest: { [K in ExtensionCategory]?: StoreEntry[] },
 ): Promise<Orphan[]> => {
   const orphans: Orphan[] = []
-  const categories: ExtensionCategory[] = ["plugins", "themes", "engines", "transports", "autocomplete"]
-  for (const category of categories) {
+  for (const category of EXTENSION_CATEGORIES) {
     const entries = manifest[category] ?? []
     const found = await listOrphansInCategory(storeDir, category, entries)
     for (const relPath of found) orphans.push({ category, relPath })

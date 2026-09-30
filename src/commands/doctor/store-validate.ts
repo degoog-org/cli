@@ -1,7 +1,7 @@
 import { stat } from "node:fs/promises"
 import { join } from "node:path"
-import { exists } from "./detect.ts"
-import type { CheckResult, ExtensionCategory, StoreEntry, StoreManifest } from "./types.ts"
+import { exists } from "./detect"
+import type { CheckResult, ExtensionCategory, StoreEntry, StoreManifest } from "./types"
 
 export const validateTopLevel = (manifest: StoreManifest): CheckResult[] => {
   const results: CheckResult[] = []

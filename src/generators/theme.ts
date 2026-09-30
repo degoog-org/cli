@@ -1,7 +1,7 @@
 import * as p from "@clack/prompts"
-import { scaffoldDir, authorJsonTpl } from "../utils/files.ts"
-import { t } from "../utils/theme.ts"
-import type { GeneratorCtx } from "../types/index.ts"
+import { scaffoldDir, authorJsonTpl } from "../utils/files"
+import { t } from "../utils/theme"
+import type { GeneratorCtx } from "../types"
 import {
   layoutHtml, indexHtml, searchHtml, html404,
   gandalfHtml, robotsHtml,
@@ -9,7 +9,7 @@ import {
   srchHeaderHtml, srchTabsHtml, srchResultHtml,
   srchImageCardHtml, srchVideoCardHtml,
   srchMediaPreviewHtml, srchLightboxHtml, srchAtAGlanceHtml,
-} from "../templates/theme-assets.ts"
+} from "../templates/theme-assets"
 import { HTMLBundle } from "bun"
 
 export const HTML_PAGE_KEYS = ["layout", "index", "search", "404", "gandalf", "robots-takeover"] as const

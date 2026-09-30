@@ -1,13 +1,13 @@
 import { resolve } from "node:path"
 import * as p from "@clack/prompts"
-import { t } from "../../utils/theme.ts"
-import { logger } from "../../utils/logger.ts"
-import { promptText, promptConfirm } from "../../utils/prompts.ts"
-import { exists, detectTarget } from "./detect.ts"
-import { runChecks } from "./checks.ts"
-import { runStoreChecks } from "./store.ts"
-import { printResults } from "./report.ts"
-import type { StoreRunSummary } from "./types.ts"
+import { t } from "../../utils/theme"
+import { logger } from "../../utils/logger"
+import { promptText, promptConfirm } from "../../utils/prompts"
+import { exists, detectTarget } from "./detect"
+import { runChecks } from "./checks"
+import { runStoreChecks } from "./store"
+import { printResults } from "./report"
+import type { StoreRunSummary } from "./types"
 
 type ParsedArgs = {
   pathArg: string | undefined
@@ -56,7 +56,7 @@ export const doctorCmd = async (): Promise<void> => {
     logger.error(
       `not a recognisable extension or store: ${targetDir}\n` +
         "  - an extension has theme.json or index.{ts,js}\n" +
-        "  - a store has a package.json with plugins/themes/engines/transports/autocomplete arrays",
+        "  - a store has a package.json with plugins/themes/engines/transports/autocomplete/favicon arrays",
     )
     process.exit(1)
   }

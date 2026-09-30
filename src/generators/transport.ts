@@ -1,5 +1,5 @@
-import { scaffoldDir, authorJsonTpl, readmeTpl } from "../utils/files.ts"
-import type { GeneratorCtx } from "../types/index.ts"
+import { scaffoldDir, authorJsonTpl, readmeTpl } from "../utils/files"
+import type { GeneratorCtx } from "../types"
 
 const indexTpl = (name: string) => `export const transport = {
   name: "${name}",

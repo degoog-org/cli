@@ -1,5 +1,5 @@
-import { scaffoldDir, authorJsonTpl, readmeTpl } from "../utils/files.ts"
-import type { GeneratorCtx } from "../types/index.ts"
+import { scaffoldDir, authorJsonTpl, readmeTpl } from "../utils/files"
+import type { GeneratorCtx } from "../types"
 
 const indexTpl = (name: string) => `// If this file also exports other hooks (slot, interceptor, command, etc.) and
 // you want a single settings card for all of them, add a top-level plugin identity:

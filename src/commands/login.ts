@@ -1,7 +1,7 @@
 import * as p from "@clack/prompts"
-import { loadConfig, saveConfig } from "../config/store.ts"
-import { logger } from "../utils/logger.ts"
-import type { Config } from "../types/index.ts"
+import { loadConfig, saveConfig } from "../config/store"
+import { logger } from "../utils/logger"
+import type { Config } from "../types"
 
 const isValidUrl = (val: string) => {
   if (!val) return undefined
