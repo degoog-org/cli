@@ -1,7 +1,7 @@
-import { scaffoldDir, authorJsonTpl, readmeTpl } from "../utils/files.ts";
-import type { GeneratorCtx } from "../types/index.ts";
+import { scaffoldDir, authorJsonTpl, readmeTpl } from "../utils/files";
+import type { GeneratorCtx } from "../types";
 
-const indexTpl = (name: string) => `export const type = "web" // string or array - e.g. "web", "books", ["web", "any-type"]
+const indexTpl = (name: string, challenges: boolean) => `export const type = "web" // string or array - e.g. "web", "books", ["web", "any-type"]
 
 // filters example (image engines only):
 // Declare which image filter groups/values this engine actually supports.
@@ -24,7 +24,7 @@ const indexTpl = (name: string) => `export const type = "web" // string or array
 export const engine = {
   name: "${name}",
   bangShortcut: "${name}",
-
+${challenges ? `  challenges: ["anubis"],\n` : ""}
   // settingsSchema: [
   //   { key: "apiKey", label: "API Key", type: "password", required: true },
   // ],
@@ -83,7 +83,7 @@ export const engine = {
 
 export const generateEngine = async (ctx: GeneratorCtx) =>
   scaffoldDir(ctx.outDir, ctx.name, {
-    "index.ts": indexTpl(ctx.name),
+    "index.ts": indexTpl(ctx.name, ctx.challenges ?? false),
     "README.md": readmeTpl(ctx.name, "A custom search engine for degoog."),
     "author.json": authorJsonTpl(ctx.config),
   });

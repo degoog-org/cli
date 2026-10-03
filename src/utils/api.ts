@@ -1,5 +1,5 @@
-import type { Config } from "../types/index.ts"
-import { logger } from "./logger.ts"
+import type { Config } from "../types"
+import { logger } from "./logger"
 
 type ApiResult<T> =
   | { ok: true; data: T }

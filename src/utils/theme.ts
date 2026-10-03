@@ -1,7 +1,12 @@
-const fg = (r: number, g: number, b: number) => `\x1b[38;2;${r};${g};${b}m`
-const RESET = "\x1b[0m"
-const BOLD = "\x1b[1m"
-const DIM = "\x1b[2m"
+const COLOR =
+  !process.env.NO_COLOR &&
+  !process.argv.includes("--no-color") &&
+  (process.stdout.isTTY || !!process.env.FORCE_COLOR)
+
+const fg = (r: number, g: number, b: number) => (COLOR ? `\x1b[38;2;${r};${g};${b}m` : "")
+const RESET = COLOR ? "\x1b[0m" : ""
+const BOLD = COLOR ? "\x1b[1m" : ""
+const DIM = COLOR ? "\x1b[2m" : ""
 
 const c = {
   primary:   fg(86,  115, 172),

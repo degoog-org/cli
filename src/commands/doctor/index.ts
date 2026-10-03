@@ -1,26 +1,24 @@
 import { resolve } from "node:path"
-import * as p from "@clack/prompts"
-import { t } from "../../utils/theme.ts"
-import { logger } from "../../utils/logger.ts"
-import { promptText, promptConfirm } from "../../utils/prompts.ts"
-import { exists, detectTarget } from "./detect.ts"
-import { runChecks } from "./checks.ts"
-import { runStoreChecks } from "./store.ts"
-import { printResults } from "./report.ts"
-import type { StoreRunSummary } from "./types.ts"
+import { t } from "../../utils/theme"
+import { logger } from "../../utils/logger"
+import { argv, positionalsAfter } from "../../utils/argv"
+import { ui } from "../../utils/ui"
+import { promptText, promptConfirm } from "../../utils/prompts"
+import { exists, detectTarget } from "./detect"
+import { runChecks } from "./checks"
+import { runStoreChecks } from "./store"
+import { printResults } from "./report"
+import type { StoreRunSummary } from "./types"
 
 type ParsedArgs = {
   pathArg: string | undefined
   doFix: boolean
 }
 
-const parseArgs = (): ParsedArgs => {
-  const argStart = process.argv[2] === "doctor" ? 3 : 2
-  const args = process.argv.slice(argStart)
-  const doFix = args.includes("--fix")
-  const pathArg = args.find((a) => !a.startsWith("-"))
-  return { pathArg, doFix }
-}
+const parseArgs = (): ParsedArgs => ({
+  pathArg: positionalsAfter("doctor")[0],
+  doFix: argv.fix,
+})
 
 const summaryLine = (s: StoreRunSummary): string =>
   [
@@ -34,7 +32,7 @@ const summaryLine = (s: StoreRunSummary): string =>
 export const doctorCmd = async (): Promise<void> => {
   const { pathArg, doFix: fixFlag } = parseArgs()
 
-  p.intro(t.brand("degoog doctor"))
+  ui.intro(t.brand("degoog doctor"))
 
   const cwd = process.cwd()
   const targetDir = pathArg
@@ -56,13 +54,13 @@ export const doctorCmd = async (): Promise<void> => {
     logger.error(
       `not a recognisable extension or store: ${targetDir}\n` +
         "  - an extension has theme.json or index.{ts,js}\n" +
-        "  - a store has a package.json with plugins/themes/engines/transports/autocomplete arrays",
+        "  - a store has a package.json with plugins/themes/engines/transports/autocomplete/favicon arrays",
     )
     process.exit(1)
   }
 
   if (target.kind === "store") {
-    p.log.info(t.muted(`checking store at ${targetDir}`))
+    ui.info(t.muted(`checking store at ${targetDir}`))
     const summary = await runStoreChecks(
       target.dir,
       target.manifestPath,
@@ -71,25 +69,25 @@ export const doctorCmd = async (): Promise<void> => {
     )
     console.log("")
     if (summary.failed > 0) {
-      p.outro(t.danger(`store has issues - ${summaryLine(summary)}`))
+      ui.outro(t.danger(`store has issues - ${summaryLine(summary)}`))
       process.exit(1)
     }
-    p.outro(t.success(`store looks good - ${summaryLine(summary)}`))
+    ui.outro(t.success(`store looks good - ${summaryLine(summary)}`))
     return
   }
 
-  p.log.info(t.muted(`checking extension at ${targetDir}`))
+  ui.info(t.muted(`checking extension at ${targetDir}`))
   const { results, failed } = await runChecks(target.dir, applyFix, target.extKind)
   printResults(results)
   console.log("")
 
   if (failed && !applyFix) {
-    p.outro(t.danger("issues found - re-run and choose to apply fixes, or pass --fix"))
+    ui.outro(t.danger("issues found - re-run and choose to apply fixes, or pass --fix"))
     process.exit(1)
   }
   if (failed) {
-    p.outro(t.warning("some issues could not be auto-fixed (see WARN above)"))
+    ui.outro(t.warning("some issues could not be auto-fixed (see WARN above)"))
     process.exit(1)
   }
-  p.outro(t.success("all checks passed"))
+  ui.outro(t.success("all checks passed"))
 }

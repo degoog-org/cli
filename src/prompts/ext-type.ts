@@ -1,5 +1,5 @@
 import * as p from "@clack/prompts"
-import { ExtType } from "../types/index.ts"
+import { ExtType } from "../types"
 
 type SelectOption = { value: string; label: string; hint?: string }
 
@@ -16,6 +16,7 @@ const TOP_LEVEL: SelectOption[] = [
   { value: ExtType.Engine, label: "Engine", hint: "custom search engine" },
   { value: ExtType.Transport, label: "Transport", hint: "custom HTTP fetch strategy" },
   { value: ExtType.Autocomplete, label: "Autocomplete Provider", hint: "search suggestions" },
+  { value: ExtType.Favicon, label: "Favicon Provider", hint: "result favicons" },
   { value: ExtType.Theme, label: "Theme", hint: "UI theme with CSS and templates" },
   { value: "plugin", label: "Plugin", hint: "bang command, slot, tab, interceptor, middleware or route" },
 ]

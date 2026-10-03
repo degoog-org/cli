@@ -1,15 +1,16 @@
 import { readFile, writeFile } from "node:fs/promises"
 import { join, basename, dirname, resolve } from "node:path"
 import {
+  CHALLENGES_MIN_DEGOOG_VERSION,
   EXTENSION_CATEGORIES,
   type ExtensionCategory,
   type PluginType,
   type StoreEntry,
   type StoreManifest,
-} from "../commands/doctor/types.ts"
-import { ExtType, type Config } from "../types/index.ts"
-import { exists, mkdirp } from "./files.ts"
-import { logger } from "./logger.ts"
+} from "../commands/doctor/types"
+import { ExtType, type Config } from "../types"
+import { exists, mkdirp } from "./files"
+import { logger } from "./logger"
 
 export type StoreRoot = {
   dir: string
@@ -47,6 +48,7 @@ const EXT_TYPE_CATEGORY: Record<ExtType, ExtensionCategory> = {
   [ExtType.Engine]: "engines",
   [ExtType.Transport]: "transports",
   [ExtType.Autocomplete]: "autocomplete",
+  [ExtType.Favicon]: "favicon",
   [ExtType.Theme]: "themes",
   [ExtType.PluginBang]: "plugins",
   [ExtType.PluginSlot]: "plugins",
@@ -66,7 +68,11 @@ const EXT_TYPE_PLUGIN_TYPE: Partial<Record<ExtType, PluginType>> = {
   [ExtType.PluginIntercept]: "interceptor",
 }
 
-export const buildStoreEntry = (name: string, extType: ExtType): StoreEntry => {
+export const buildStoreEntry = (
+  name: string,
+  extType: ExtType,
+  challenges = false,
+): StoreEntry => {
   const category = extTypeToCategory(extType)
   const entry: StoreEntry = {
     path: `${category}/${name}`,
@@ -77,6 +83,9 @@ export const buildStoreEntry = (name: string, extType: ExtType): StoreEntry => {
   if (category === "plugins") {
     entry.type = EXT_TYPE_PLUGIN_TYPE[extType] ?? "command"
   }
+  if (extType === ExtType.Engine && challenges) {
+    entry.minDegoogVersion = CHALLENGES_MIN_DEGOOG_VERSION
+  }
   return entry
 }
 
@@ -84,12 +93,13 @@ export const registerExtensionInStore = async (
   storeDir: string,
   name: string,
   extType: ExtType,
+  challenges = false,
 ): Promise<void> => {
   const store = await readStoreManifest(storeDir)
   if (!store) return
 
   const category = extTypeToCategory(extType)
-  const entry = buildStoreEntry(name, extType)
+  const entry = buildStoreEntry(name, extType, challenges)
   const manifest = { ...store.manifest }
   const existing = manifest[category]
   const list = Array.isArray(existing) ? [...(existing as StoreEntry[])] : []
@@ -114,6 +124,7 @@ export const scaffoldStore = async (dir: string, config: Config): Promise<void> 
     engines: [],
     transports: [],
     autocomplete: [],
+    favicon: [],
   }
 
   const manifestPath = join(resolved, "package.json")

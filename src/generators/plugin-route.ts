@@ -1,5 +1,5 @@
-import { scaffoldDir, authorJsonTpl, readmeTpl } from "../utils/files.ts"
-import type { GeneratorCtx } from "../types/index.ts"
+import { scaffoldDir, authorJsonTpl, readmeTpl } from "../utils/files"
+import type { GeneratorCtx } from "../types"
 
 const indexTpl = () => `// Routes are served at /api/plugin/<pluginId>/<path>, where <pluginId> is the
 // installed folder ID assigned by degoog (e.g. <author>-<repo>-<plugin>). Never

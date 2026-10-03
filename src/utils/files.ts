@@ -1,7 +1,7 @@
 import { mkdir, writeFile, access } from "node:fs/promises"
 import { join, resolve, dirname } from "node:path"
-import { logger } from "./logger.ts"
-import type { Config } from "../types/index.ts"
+import { logger } from "./logger"
+import type { Config } from "../types"
 import { HTMLBundle } from "bun"
 
 export const mkdirp = async (dir: string) => {

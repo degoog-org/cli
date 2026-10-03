@@ -1,7 +1,7 @@
 import { join, basename, dirname } from "node:path"
-import { exists } from "../../utils/files.ts"
-import { readStoreManifest } from "../../utils/store.ts"
-import type { ExtensionKind, Target } from "./types.ts"
+import { exists } from "../../utils/files"
+import { readStoreManifest } from "../../utils/store"
+import type { ExtensionKind, Target } from "./types"
 
 export { exists }
 
@@ -11,6 +11,7 @@ const KIND_FROM_FOLDER: Record<string, ExtensionKind> = {
   engines: "engine",
   transports: "transport",
   autocomplete: "autocomplete",
+  favicon: "favicon",
 }
 
 const detectKindFromParent = (dir: string): ExtensionKind => {

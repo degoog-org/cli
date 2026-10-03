@@ -1,7 +1,14 @@
 import { stat } from "node:fs/promises"
 import { join } from "node:path"
-import { exists } from "./detect.ts"
-import type { CheckResult, ExtensionCategory, StoreEntry, StoreManifest } from "./types.ts"
+import { exists } from "./detect"
+import {
+  CHALLENGES_MIN_DEGOOG_VERSION,
+  FAVICON_SIGNER_MIN_DEGOOG_VERSION,
+  type CheckResult,
+  type ExtensionCategory,
+  type StoreEntry,
+  type StoreManifest,
+} from "./types"
 
 export const validateTopLevel = (manifest: StoreManifest): CheckResult[] => {
   const results: CheckResult[] = []
@@ -122,3 +129,37 @@ export const validatePathExistence = async (
 
   return { results, toRemove }
 }
+
+const versionParts = (version: string): number[] =>
+  (version.trim().replace(/^v/, "").split("-")[0] ?? "")
+    .split(".")
+    .map((part) => Number.parseInt(part, 10) || 0)
+
+export const isVersionAtLeast = (version: string, minimum: string): boolean => {
+  const have = versionParts(version)
+  const want = versionParts(minimum)
+  for (let i = 0; i < Math.max(have.length, want.length); i++) {
+    const a = have[i] ?? 0
+    const b = want[i] ?? 0
+    if (a !== b) return a > b
+  }
+  return true
+}
+
+const validateMinVersion = (entry: StoreEntry, minimum: string, who: string): CheckResult => {
+  const label = `package.json minDegoogVersion >= ${minimum}`
+  const v = entry.minDegoogVersion
+  if (typeof v !== "string" || v.trim() === "") {
+    return { label, status: "warn", detail: `missing - ${who} need degoog ${minimum} or newer` }
+  }
+  if (!isVersionAtLeast(v, minimum)) {
+    return { label, status: "warn", detail: `set to ${v} - ${who} need degoog ${minimum} or newer` }
+  }
+  return { label, status: "pass" }
+}
+
+export const validateChallengesMinVersion = (entry: StoreEntry): CheckResult =>
+  validateMinVersion(entry, CHALLENGES_MIN_DEGOOG_VERSION, 'engines that set "challenges"')
+
+export const validateFaviconSignerMinVersion = (entry: StoreEntry): CheckResult =>
+  validateMinVersion(entry, FAVICON_SIGNER_MIN_DEGOOG_VERSION, "plugins that call signFaviconUrl")

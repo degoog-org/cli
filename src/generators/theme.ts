@@ -1,7 +1,8 @@
 import * as p from "@clack/prompts"
-import { scaffoldDir, authorJsonTpl } from "../utils/files.ts"
-import { t } from "../utils/theme.ts"
-import type { GeneratorCtx } from "../types/index.ts"
+import { scaffoldDir, authorJsonTpl } from "../utils/files"
+import { t } from "../utils/theme"
+import { isHeadless } from "../utils/headless"
+import type { GeneratorCtx } from "../types"
 import {
   layoutHtml, indexHtml, searchHtml, html404,
   gandalfHtml, robotsHtml,
@@ -9,7 +10,7 @@ import {
   srchHeaderHtml, srchTabsHtml, srchResultHtml,
   srchImageCardHtml, srchVideoCardHtml,
   srchMediaPreviewHtml, srchLightboxHtml, srchAtAGlanceHtml,
-} from "../templates/theme-assets.ts"
+} from "../templates/theme-assets"
 import { HTMLBundle } from "bun"
 
 export const HTML_PAGE_KEYS = ["layout", "index", "search", "404", "gandalf", "robots-takeover"] as const
@@ -187,6 +188,33 @@ The file contains blocks for \`:root\` (light), \`[data-theme="dark"]\`,
 Templates listed under the \`templates\` key in \`theme.json\` replace individual
 UI sections without touching anything else. Only include keys you want to change.
 
+## The no-JS page
+
+If the instance serves the script-free page at \`/nojs\`, your theme already
+covers it. That page loads the same \`html\` shells and the same \`templates\`
+entries listed above and fills them in on the server, so anything you restyle
+here shows up there.
+
+Only override a section that genuinely cannot work without scripts. Drop a
+\`nojs/<name>.html\` file in your theme folder, no \`theme.json\` entry needed.
+Each name resolves through your \`nojs/\` folder, then degoog's, then your own
+template for that name, then degoog's.
+
+\`\`\`
+nojs/
+  logo.html    tabs.html    pagination.html
+\`\`\`
+
+Those three are the ones degoog itself overrides: a monospace logo, a filter
+form of real \`<select>\`s instead of JS dropdowns, and page links the client
+otherwise builds in code. Everything else is inherited.
+
+You do not need to strip your own scripts. Every template the no-JS page renders
+is sanitised first, \`<script>\` blocks, inline \`on*=\` handlers and module
+preloads removed, and the CSS bot check link is injected for you. Do check what
+a template looks like with its behaviour taken away, because a section that only
+fills in once a script runs will render empty.
+
 ## Static assets
 
 Any file inside your theme folder is served at \`/themes/<theme-id>/<path>\`.
@@ -242,30 +270,35 @@ const buildThemeJson = (name: string, sel: Selection): string => {
   return JSON.stringify(manifest, null, 2) + "\n"
 }
 
-export const generateTheme = async (ctx: GeneratorCtx) => {
+const THEME_PART_OPTIONS = [
+  { value: "css", label: t.text("Custom styles"), hint: "CSS variable overrides for colours and spacing" },
+  { value: "layout", label: t.text("Base layout"), hint: "Full HTML shell - head, scripts, tokens. Override with care" },
+  { value: "index", label: t.text("Home page"), hint: "index.html - the landing page" },
+  { value: "search", label: t.text("Search results page"), hint: "search.html - the full results listing" },
+  { value: "404", label: t.text("404 page"), hint: "Custom not-found page" },
+  { value: "easter-eggs", label: t.text("Easter eggs"), hint: "Gandalf and robots-takeover pages" },
+  { value: "home-logo", label: t.text("Home: logo"), hint: "Replace the logo area on the home page" },
+  { value: "home-search", label: t.text("Home: search bar"), hint: "Replace the search form on the home page" },
+  { value: "home-header", label: t.text("Home: header"), hint: "Replace the top navigation on the home page" },
+  { value: "home-footer", label: t.text("Home: footer"), hint: "Replace the page footer" },
+  { value: "search-header", label: t.text("Search: header bar"), hint: "Logo + search bar + settings gear on results page" },
+  { value: "search-tabs", label: t.text("Search: result tabs"), hint: "Web / Images / Videos / News tab strip" },
+  { value: "result", label: t.text("Search: result card"), hint: "Individual web and news result items" },
+  { value: "image-card", label: t.text("Search: image card"), hint: "Image grid thumbnails" },
+  { value: "video-card", label: t.text("Search: video card"), hint: "Video result cards" },
+  { value: "search-media-preview", label: t.text("Search: media preview"), hint: "Expanded image/video preview panel" },
+  { value: "search-lightbox", label: t.text("Search: lightbox"), hint: "Full-screen image lightbox" },
+  { value: "at-a-glance", label: t.text("Search: at-a-glance"), hint: "AI / knowledge panel" },
+  { value: "settings-schema", label: t.text("User settings"), hint: "Adds configurable options (e.g. colour variants)" },
+] as const
+
+export const THEME_PARTS: string[] = THEME_PART_OPTIONS.map((o) => o.value)
+
+const pickThemeParts = async (): Promise<string[]> => {
+  if (isHeadless) return ["css"]
   const chosen = await p.multiselect<string>({
     message: t.muted("what do you want to include in your theme?"),
-    options: [
-      { value: "css", label: t.text("Custom styles"), hint: "CSS variable overrides for colours and spacing" },
-      { value: "layout", label: t.text("Base layout"), hint: "Full HTML shell - head, scripts, tokens. Override with care" },
-      { value: "index", label: t.text("Home page"), hint: "index.html - the landing page" },
-      { value: "search", label: t.text("Search results page"), hint: "search.html - the full results listing" },
-      { value: "404", label: t.text("404 page"), hint: "Custom not-found page" },
-      { value: "easter-eggs", label: t.text("Easter eggs"), hint: "Gandalf and robots-takeover pages" },
-      { value: "home-logo", label: t.text("Home: logo"), hint: "Replace the logo area on the home page" },
-      { value: "home-search", label: t.text("Home: search bar"), hint: "Replace the search form on the home page" },
-      { value: "home-header", label: t.text("Home: header"), hint: "Replace the top navigation on the home page" },
-      { value: "home-footer", label: t.text("Home: footer"), hint: "Replace the page footer" },
-      { value: "search-header", label: t.text("Search: header bar"), hint: "Logo + search bar + settings gear on results page" },
-      { value: "search-tabs", label: t.text("Search: result tabs"), hint: "Web / Images / Videos / News tab strip" },
-      { value: "result", label: t.text("Search: result card"), hint: "Individual web and news result items" },
-      { value: "image-card", label: t.text("Search: image card"), hint: "Image grid thumbnails" },
-      { value: "video-card", label: t.text("Search: video card"), hint: "Video result cards" },
-      { value: "search-media-preview", label: t.text("Search: media preview"), hint: "Expanded image/video preview panel" },
-      { value: "search-lightbox", label: t.text("Search: lightbox"), hint: "Full-screen image lightbox" },
-      { value: "at-a-glance", label: t.text("Search: at-a-glance"), hint: "AI / knowledge panel" },
-      { value: "settings-schema", label: t.text("User settings"), hint: "Adds configurable options (e.g. colour variants)" },
-    ],
+    options: [...THEME_PART_OPTIONS],
     required: false,
   })
 
@@ -273,6 +306,11 @@ export const generateTheme = async (ctx: GeneratorCtx) => {
     p.cancel(t.muted("cancelled"))
     process.exit(0)
   }
+  return chosen
+}
+
+export const generateTheme = async (ctx: GeneratorCtx) => {
+  const chosen = ctx.themeParts ?? (await pickThemeParts())
 
   const sel: Selection = {
     includeCss: chosen.includes("css"),

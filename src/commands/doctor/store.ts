@@ -1,17 +1,19 @@
 import { writeFile } from "node:fs/promises"
 import { join, basename } from "node:path"
-import * as p from "@clack/prompts"
-import { t } from "../../utils/theme.ts"
-import { exists } from "./detect.ts"
-import { runChecks } from "./checks.ts"
-import { printResults } from "./report.ts"
+import { t } from "../../utils/theme"
+import { ui } from "../../utils/ui"
+import { exists } from "./detect"
+import { declaresChallenges, runChecks, usesFaviconSigner } from "./checks"
+import { printResults } from "./report"
 import {
   validateTopLevel,
   validateEntry,
   validatePathExistence,
   findDuplicateEntries,
-} from "./store-validate.ts"
-import { collectOrphans, resolveOrphans } from "./store-orphans.ts"
+  validateChallengesMinVersion,
+  validateFaviconSignerMinVersion,
+} from "./store-validate"
+import { collectOrphans, resolveOrphans } from "./store-orphans"
 import {
   EXTENSION_CATEGORIES,
   CATEGORY_TO_KIND,
@@ -20,7 +22,7 @@ import {
   type StoreEntry,
   type StoreManifest,
   type StoreRunSummary,
-} from "./types.ts"
+} from "./types"
 
 const writeManifest = async (path: string, manifest: StoreManifest): Promise<void> => {
   await writeFile(path, JSON.stringify(manifest, null, 2) + "\n", "utf-8")
@@ -35,7 +37,7 @@ const tallyResults = (results: CheckResult[], summary: StoreRunSummary): void =>
 }
 
 const sectionHeader = (label: string): void => {
-  p.log.step(t.brand(label))
+  ui.step(t.brand(label))
 }
 
 const collectEntryIssues = async (
@@ -85,12 +87,13 @@ const processCategory = async (
 const handleOrphans = async (
   storeDir: string,
   manifest: StoreManifest,
+  doFix: boolean,
   summary: StoreRunSummary,
 ): Promise<boolean> => {
   const orphans = await collectOrphans(storeDir, manifest)
   if (orphans.length === 0) return false
 
-  const resolution = await resolveOrphans(orphans)
+  const resolution = await resolveOrphans(orphans, doFix)
   summary.fixed += resolution.added
   summary.failed += resolution.skipped
 
@@ -122,6 +125,12 @@ const runExtensionChecks = async (
 
       sectionHeader(`${category}/${basename(entry.path)}`)
       const { results } = await runChecks(full, doFix, kind)
+      if (kind === "engine" && (await declaresChallenges(full))) {
+        results.push(validateChallengesMinVersion(entry))
+      }
+      if (kind === "plugin" && (await usesFaviconSigner(full))) {
+        results.push(validateFaviconSignerMinVersion(entry))
+      }
       printResults(results)
       tallyResults(results, summary)
     }
@@ -147,7 +156,7 @@ export const runStoreChecks = async (
     if (changed) manifestMutated = true
   }
 
-  const addedOrphans = await handleOrphans(storeDir, manifest, summary)
+  const addedOrphans = await handleOrphans(storeDir, manifest, doFix, summary)
   if (addedOrphans) manifestMutated = true
 
   if (manifestMutated) {

@@ -1,5 +1,5 @@
-import { t } from "../../utils/theme.ts"
-import type { CheckResult, CheckStatus } from "./types.ts"
+import { t } from "../../utils/theme"
+import type { CheckResult, CheckStatus } from "./types"
 
 const PASS = t.success("PASS")
 const FAIL = t.danger("FAIL")

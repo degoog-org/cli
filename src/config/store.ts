@@ -1,8 +1,8 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises"
 import { join, dirname } from "node:path"
 import { homedir } from "node:os"
-import { logger } from "../utils/logger.ts"
-import type { Config } from "../types/index.ts"
+import { logger } from "../utils/logger"
+import type { Config } from "../types"
 
 const CONFIG_BASE = process.env.DEGOOG_CONFIG_HOME ?? join(homedir(), ".config", "degoog")
 const CONFIG_PATH = join(CONFIG_BASE, "config.json")

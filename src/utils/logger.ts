@@ -1,4 +1,4 @@
-import { t } from "./theme.ts"
+import { t } from "./theme"
 
 export const logger = {
   info:    (msg: string) => console.log(`${t.muted("info")}  ${msg}`),

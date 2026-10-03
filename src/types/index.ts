@@ -2,6 +2,7 @@ export enum ExtType {
   Engine = "engine",
   Transport = "transport",
   Autocomplete = "autocomplete",
+  Favicon = "favicon",
   Theme = "theme",
   PluginBang = "plugin-bang",
   PluginSlot = "plugin-slot",
@@ -15,6 +16,9 @@ export type GeneratorCtx = {
   name: string
   outDir: string
   config: Config
+  challenges?: boolean
+  handlesChallenges?: boolean
+  themeParts?: string[]
 }
 
 export type Config = {

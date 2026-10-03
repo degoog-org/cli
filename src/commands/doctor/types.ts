@@ -6,9 +6,9 @@ export type CheckResult = {
   detail?: string | undefined
 }
 
-export type ExtensionKind = "theme" | "plugin" | "engine" | "transport" | "autocomplete" | "unknown"
+export type ExtensionKind = "theme" | "plugin" | "engine" | "transport" | "autocomplete" | "favicon" | "unknown"
 
-export type ExtensionCategory = "themes" | "plugins" | "engines" | "transports" | "autocomplete"
+export type ExtensionCategory = "themes" | "plugins" | "engines" | "transports" | "autocomplete" | "favicon"
 
 export const EXTENSION_CATEGORIES: ExtensionCategory[] = [
   "plugins",
@@ -16,6 +16,7 @@ export const EXTENSION_CATEGORIES: ExtensionCategory[] = [
   "engines",
   "transports",
   "autocomplete",
+  "favicon",
 ]
 
 export const CATEGORY_TO_KIND: Record<ExtensionCategory, Exclude<ExtensionKind, "unknown">> = {
@@ -24,11 +25,18 @@ export const CATEGORY_TO_KIND: Record<ExtensionCategory, Exclude<ExtensionKind, 
   engines: "engine",
   transports: "transport",
   autocomplete: "autocomplete",
+  favicon: "favicon",
 }
 
 export const PLUGIN_TYPES = ["command", "slot", "interceptor", "search-result-tab"] as const
 
 export type PluginType = typeof PLUGIN_TYPES[number]
+
+export const ENGINE_CHALLENGES: readonly string[] = ["anubis"]
+
+export const CHALLENGES_MIN_DEGOOG_VERSION = "1.0.0"
+
+export const FAVICON_SIGNER_MIN_DEGOOG_VERSION = "1.0.0"
 
 export type StoreEntry = {
   path?: string
@@ -50,6 +58,7 @@ export type StoreManifest = {
   engines?: StoreEntry[]
   transports?: StoreEntry[]
   autocomplete?: StoreEntry[]
+  favicon?: StoreEntry[]
 } & Record<string, unknown>
 
 export type Target =
