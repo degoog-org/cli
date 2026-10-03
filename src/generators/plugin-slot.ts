@@ -22,7 +22,7 @@ export const slot = {
   /**
    * Set to true if your execute() returns HTML that causes the browser
    * to fetch external URLs (images, scripts, etc.).
-   * Set to false if all network access goes through context.fetch / signProxyUrl.
+   * Set to false if all network access goes through context.fetch / signProxyUrl / signFaviconUrl.
    * Leaving this unset shows an ambiguous badge in the degoog settings page.
    */
   isClientExposed: false,
@@ -43,6 +43,8 @@ export const slot = {
   //   ctx.routeUrl // (path) => /api/plugin/<ctx.pluginId>/<path>
   //   ctx.dir      // absolute path to plugin folder (do NOT derive route IDs from it)
   //   ctx.readFile // async file reader
+  //   ctx.signProxyUrl   // (url) => signed /api/proxy/image URL for an external image
+  //   ctx.signFaviconUrl // (url) => signed /api/proxy/favicon URL for the url's host, "" when no favicon provider is enabled
   // },
 
   async trigger(query: string): Promise<boolean> {
@@ -54,6 +56,7 @@ export const slot = {
     dir: string
     readFile: (filename: string) => Promise<string>
     signProxyUrl: (url: string) => string
+    signFaviconUrl: (url: string) => string
     fetch: typeof fetch
     useCache: <T>(namespace: string, defaultTtlMs: number) => {
       get: (key: string) => Promise<T | null>

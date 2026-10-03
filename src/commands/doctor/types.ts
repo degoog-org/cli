@@ -36,6 +36,8 @@ export const ENGINE_CHALLENGES: readonly string[] = ["anubis"]
 
 export const CHALLENGES_MIN_DEGOOG_VERSION = "1.0.0"
 
+export const FAVICON_SIGNER_MIN_DEGOOG_VERSION = "1.0.0"
+
 export type StoreEntry = {
   path?: string
   name?: string

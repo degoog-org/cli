@@ -3,7 +3,7 @@ import { join, basename } from "node:path"
 import { t } from "../../utils/theme"
 import { ui } from "../../utils/ui"
 import { exists } from "./detect"
-import { declaresChallenges, runChecks } from "./checks"
+import { declaresChallenges, runChecks, usesFaviconSigner } from "./checks"
 import { printResults } from "./report"
 import {
   validateTopLevel,
@@ -11,6 +11,7 @@ import {
   validatePathExistence,
   findDuplicateEntries,
   validateChallengesMinVersion,
+  validateFaviconSignerMinVersion,
 } from "./store-validate"
 import { collectOrphans, resolveOrphans } from "./store-orphans"
 import {
@@ -126,6 +127,9 @@ const runExtensionChecks = async (
       const { results } = await runChecks(full, doFix, kind)
       if (kind === "engine" && (await declaresChallenges(full))) {
         results.push(validateChallengesMinVersion(entry))
+      }
+      if (kind === "plugin" && (await usesFaviconSigner(full))) {
+        results.push(validateFaviconSignerMinVersion(entry))
       }
       printResults(results)
       tallyResults(results, summary)

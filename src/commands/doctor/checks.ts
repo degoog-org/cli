@@ -1,4 +1,5 @@
 import { readFile, writeFile, readdir } from "node:fs/promises"
+import type { Dirent } from "node:fs"
 import { join, basename } from "node:path"
 import { exists } from "./detect"
 import { findStoreRoot } from "../../utils/store"
@@ -181,6 +182,51 @@ const checkRouteConventions = async (dir: string, doFix: boolean): Promise<Check
   }
   return results
 }
+
+const FAVICON_SOURCE_EXT = /\.(js|mjs|cjs|ts|html)$/
+const HAND_BUILT_FAVICON_RE = /\/api\/proxy\/favicon\?domain=/
+const FAVICON_SIGNER_RE = /\bsignFaviconUrl\b/
+
+const readPluginSources = async (dir: string, rel = ""): Promise<{ file: string; src: string }[]> => {
+  let entries: Dirent[]
+  try {
+    entries = await readdir(join(dir, rel), { withFileTypes: true })
+  } catch {
+    return []
+  }
+  const out: { file: string; src: string }[] = []
+  for (const entry of entries) {
+    const file = rel ? `${rel}/${entry.name}` : entry.name
+    if (entry.isDirectory()) {
+      if (entry.name === "node_modules" || entry.name.startsWith(".")) continue
+      out.push(...(await readPluginSources(dir, file)))
+    } else if (FAVICON_SOURCE_EXT.test(entry.name)) {
+      try {
+        out.push({ file, src: await readFile(join(dir, file), "utf-8") })
+      } catch {
+        continue
+      }
+    }
+  }
+  return out
+}
+
+export const checkFaviconUrls = async (dir: string): Promise<CheckResult[]> => {
+  const offenders = (await readPluginSources(dir))
+    .filter(({ src }) => HAND_BUILT_FAVICON_RE.test(src))
+    .map(({ file }) => file)
+  if (offenders.length === 0) {
+    return [{ label: "favicon URLs are signed by degoog", status: "pass" }]
+  }
+  return offenders.map((file) => ({
+    label: `${file} favicon URLs`,
+    status: "fail",
+    detail: "hand-built /api/proxy/favicon URL gets a 403 - sign it on the server with ctx.signFaviconUrl(url)",
+  }))
+}
+
+export const usesFaviconSigner = async (dir: string): Promise<boolean> =>
+  (await readPluginSources(dir)).some(({ src }) => FAVICON_SIGNER_RE.test(src))
 
 const ENTRY_FILES = ["index.ts", "index.js"]
 const CHALLENGES_RE = /(?<![.\w$])challenges\s*[:=]\s*(\[[^\]]*\]|[^\s,;}]+)/
@@ -365,6 +411,9 @@ export const runChecks = async (
     const routeChecks = await checkRouteConventions(dir, doFix)
     results.push(...routeChecks)
     if (routeChecks.some((c) => c.status === "fail")) failed = true
+    const faviconChecks = await checkFaviconUrls(dir)
+    results.push(...faviconChecks)
+    if (faviconChecks.some((c) => c.status === "fail")) failed = true
   }
 
   return { results, failed }

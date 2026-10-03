@@ -3,6 +3,7 @@ import { join } from "node:path"
 import { exists } from "./detect"
 import {
   CHALLENGES_MIN_DEGOOG_VERSION,
+  FAVICON_SIGNER_MIN_DEGOOG_VERSION,
   type CheckResult,
   type ExtensionCategory,
   type StoreEntry,
@@ -145,22 +146,20 @@ export const isVersionAtLeast = (version: string, minimum: string): boolean => {
   return true
 }
 
-export const validateChallengesMinVersion = (entry: StoreEntry): CheckResult => {
-  const label = `package.json minDegoogVersion >= ${CHALLENGES_MIN_DEGOOG_VERSION}`
+const validateMinVersion = (entry: StoreEntry, minimum: string, who: string): CheckResult => {
+  const label = `package.json minDegoogVersion >= ${minimum}`
   const v = entry.minDegoogVersion
   if (typeof v !== "string" || v.trim() === "") {
-    return {
-      label,
-      status: "warn",
-      detail: `missing - engines that set "challenges" need degoog ${CHALLENGES_MIN_DEGOOG_VERSION} or newer`,
-    }
+    return { label, status: "warn", detail: `missing - ${who} need degoog ${minimum} or newer` }
   }
-  if (!isVersionAtLeast(v, CHALLENGES_MIN_DEGOOG_VERSION)) {
-    return {
-      label,
-      status: "warn",
-      detail: `set to ${v} - engines that set "challenges" need degoog ${CHALLENGES_MIN_DEGOOG_VERSION} or newer`,
-    }
+  if (!isVersionAtLeast(v, minimum)) {
+    return { label, status: "warn", detail: `set to ${v} - ${who} need degoog ${minimum} or newer` }
   }
   return { label, status: "pass" }
 }
+
+export const validateChallengesMinVersion = (entry: StoreEntry): CheckResult =>
+  validateMinVersion(entry, CHALLENGES_MIN_DEGOOG_VERSION, 'engines that set "challenges"')
+
+export const validateFaviconSignerMinVersion = (entry: StoreEntry): CheckResult =>
+  validateMinVersion(entry, FAVICON_SIGNER_MIN_DEGOOG_VERSION, "plugins that call signFaviconUrl")

@@ -30,6 +30,8 @@ export const interceptor = {
   //   ctx.routeUrl // (path) => /api/plugin/<ctx.pluginId>/<path>
   //   ctx.dir      // absolute path to plugin folder (do NOT derive route IDs from it)
   //   ctx.readFile // async file reader
+  //   ctx.signProxyUrl   // (url) => signed /api/proxy/image URL for an external image
+  //   ctx.signFaviconUrl // (url) => signed /api/proxy/favicon URL for the url's host, "" when no favicon provider is enabled
   // },
 
   async intercept(query: string, context: {
