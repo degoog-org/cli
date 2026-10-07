@@ -4,11 +4,11 @@ import type { GeneratorCtx } from "../types";
 const indexTpl = (name: string, challenges: boolean) => `export const type = "web" // string or array - e.g. "web", "books", ["web", "any-type"]
 
 // filters example (image engines only):
-// Declare which image filter groups/values this engine actually supports.
+// Declare which image filter groups/values this engine supports.
 // degoog builds the image filter bar from the union of every enabled image
-// engine's filters, so only declare values you really translate below.
-// "transparent" can live under "color" OR "type" depending on the engine -
-// put it wherever your engine implements it and degoog shows it there.
+// engine's filters, so only declare values you translate below.
+// "transparent" can sit under "color" or "type". Put it wherever your engine
+// implements it and degoog shows it there.
 //
 // export const filters = {
 //   size: ["small", "medium", "large", "wallpaper"],
@@ -26,7 +26,9 @@ export const engine = {
   bangShortcut: "${name}",
 ${challenges ? `  challenges: ["anubis"],\n` : ""}
   // settingsSchema: [
-  //   { key: "apiKey", label: "API Key", type: "password", required: true },
+  //   { key: "plan", label: "Plan", type: "select", options: ["free", "paid"], default: "free" },
+  //   // Shown and required only while plan is "paid". equals also takes an array.
+  //   { key: "apiKey", label: "API Key", type: "password", required: true, visibleWhen: { key: "plan", equals: "paid" } },
   // ],
   //
   // configure(settings) {

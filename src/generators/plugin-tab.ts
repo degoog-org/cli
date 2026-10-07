@@ -11,7 +11,7 @@ const indexTpl = (name: string) => `// If this file also exports other hooks (sl
 //   settingsSchema: [ /* shared fields */ ],
 // };
 //
-// All hooks in this file will share that id and appear as one card in settings.
+// Every hook in this file then shares that id and shows as one card in settings.
 
 export const tab = {
   id: "${name}",
@@ -23,13 +23,16 @@ export const tab = {
    * Set to true if your executeSearch() returns results whose URLs or
    * thumbnails are fetched directly by the browser (not proxied).
    * Set to false if all network access goes through context.fetch / signProxyUrl.
-   * Leaving this unset shows an ambiguous badge in the degoog settings page.
+   * Leave it unset and the degoog settings page shows an ambiguous badge.
    */
   isClientExposed: false,
 
   // settingsId: "${name}",
   // settingsSchema: [
-  //   { key: "setting", label: "Setting", type: "text" },
+  //   { key: "mode", label: "Mode", type: "select", options: ["simple", "custom"], default: "simple" },
+  //   // visibleWhen shows a field only while another field holds a value.
+  //   // equals takes one value or an array of them. In an array of rules, every rule must match.
+  //   { key: "customUrl", label: "Custom URL", type: "url", visibleWhen: { key: "mode", equals: "custom" } },
   // ],
   //
   // configure(settings) {},
@@ -38,7 +41,7 @@ export const tab = {
   // async init(ctx) {
   //   ctx.template // template.html contents
   //   ctx.pluginId // installed plugin folder ID assigned by degoog (alias: ctx.id)
-  //   ctx.apiBase  // /api/plugin/<ctx.pluginId> - base for your own routes
+  //   ctx.apiBase  // /api/plugin/<ctx.pluginId>, the base for your own routes
   //   ctx.routeUrl // (path) => /api/plugin/<ctx.pluginId>/<path>
   //   ctx.dir      // absolute path to plugin folder (do NOT derive route IDs from it)
   //   ctx.readFile // async file reader

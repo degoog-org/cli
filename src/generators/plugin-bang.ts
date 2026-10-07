@@ -11,7 +11,7 @@ const indexTpl = (name: string) => `// If this file also exports other hooks (sl
 //   settingsSchema: [ /* shared fields */ ],
 // };
 //
-// All hooks in this file will share that id and appear as one card in settings.
+// Every hook in this file then shares that id and shows as one card in settings.
 
 export default {
   name: "${name}",
@@ -22,7 +22,7 @@ export default {
    * Set to true if your execute() returns HTML that causes the browser
    * to fetch external URLs (images, scripts, etc.).
    * Set to false if all network access goes through context.fetch / signProxyUrl.
-   * Leaving this unset shows an ambiguous badge in the degoog settings page.
+   * Leave it unset and the degoog settings page shows an ambiguous badge.
    */
   isClientExposed: false,
 
@@ -50,7 +50,7 @@ export default {
   // async init(ctx) {
   //   ctx.template // template.html contents
   //   ctx.pluginId // installed plugin folder ID assigned by degoog (alias: ctx.id)
-  //   ctx.apiBase  // /api/plugin/<ctx.pluginId> - base for your own routes
+  //   ctx.apiBase  // /api/plugin/<ctx.pluginId>, the base for your own routes
   //   ctx.routeUrl // (path) => /api/plugin/<ctx.pluginId>/<path>
   //   ctx.dir      // absolute path to plugin folder (do NOT derive route IDs from it)
   //   ctx.readFile // async file reader
