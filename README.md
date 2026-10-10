@@ -14,7 +14,7 @@ CLI tool for scaffolding degoog extensions and searching your instance from the 
 curl -fsSL https://raw.githubusercontent.com/degoog-org/cli/main/install.sh | sh
 ```
 
-The installer asks whether you want Docker or a native binary. Docker is recommended - no runtime dependencies, always up to date with a pull. Native binaries are available for Linux x64/arm64 and macOS x64/arm64. Windows users should use Docker.
+The installer asks whether you want Docker or a native binary. Docker is the one to pick. It has no runtime dependencies, and a pull keeps it up to date. Native binaries exist for Linux x64/arm64 and macOS x64/arm64. On Windows, use Docker.
 
 Once installed, run it from anywhere:
 
@@ -34,7 +34,7 @@ curl -fsSL https://raw.githubusercontent.com/degoog-org/cli/main/docker-compose.
 docker compose run --rm degoog-cli
 ```
 
-Extensions are created in whichever directory you run it from. Config persists at `~/.config/degoog` on your host.
+The CLI creates extensions in whichever directory you run it from. Config persists at `~/.config/degoog` on your host.
 
 **Native binary**
 
@@ -59,13 +59,13 @@ Run login once to point the CLI at your instance and save your author details:
 degoog-cli
 ```
 
-Pick **Login / Setup** from the menu. Instance URL and API key unlock the search command.
+Pick **Login / Setup** from the menu. The instance URL and API key unlock the search command.
 
 ## Search
 
-Select **Search** from the menu to search your degoog instance directly from the terminal. Results show inline with title, URL, snippet, and sources. Pick a result to open it in your browser or keep searching.
+Select **Search** from the menu to search your degoog instance from the terminal. Each result shows its title, URL, snippet, and sources. Pick one to open it in your browser, or keep searching.
 
-Requires an instance URL to be configured.
+Search needs a configured instance URL.
 
 ## Create an extension
 
@@ -75,7 +75,7 @@ Select **Create extension** from the menu and follow the prompts, or skip them w
 degoog-cli create --name my-engine --type engine --out ./extensions
 ```
 
-Any flag you omit will still be asked interactively, unless the CLI is running headless (see below). Available types:
+The CLI asks for any flag you leave out, unless it runs headless (see below). The types are:
 
 | Type                | What it is                                                  |
 | ------------------- | ----------------------------------------------------------- |
@@ -95,15 +95,17 @@ Any flag you omit will still be asked interactively, unless the CLI is running h
 
 Every extension gets:
 
-- `index.ts` - entry file pre-filled with the correct contract for the type you picked (favicon providers get `index.js`, matching the official store)
-- `README.md` - fill this in, it shows as docs on the extension's settings page
-- `author.json` - auto-filled from your login details
+- `index.ts`, the entry file, pre-filled with the contract for the type you picked. Favicon providers get `index.js` instead, to match the official store.
+- `README.md`, which shows as docs on the extension's settings page. Fill it in.
+- `author.json`, filled in from your login details.
 
-Themes also get `style.css` with all CSS variables pre-filled to the degoog defaults (light and dark), plus a `templates/logo.html` example showing how to override a template section.
+Themes also get `style.css` with every CSS variable set to the degoog defaults for light and dark, plus a `templates/logo.html` example of overriding a template section.
 
-The generated theme README also covers the script-free `/nojs` page, which reuses your ordinary templates and takes per-file overrides from a `nojs/` folder by filename instead of through `theme.json`.
+The generated theme README also covers the script-free `/nojs` page. That page reuses your ordinary templates, and you override single files by dropping them in a `nojs/` folder under the same filename, not through `theme.json`.
 
-Plugin types also have `isClientExposed` already in the template. Set it to `true` if your plugin causes the browser to fetch external URLs directly, `false` if everything goes through the server. Leaving it unset shows a warning badge in degoog settings.
+Plugin templates already include `isClientExposed`. Set it to `true` if your plugin makes the browser fetch external URLs directly, or `false` if everything goes through the server. Leave it unset and degoog settings shows a warning badge.
+
+The commented `settingsSchema` in plugin and engine templates shows `visibleWhen`, which keeps a field hidden until another field holds a given value. Give `equals` an array to show one field for several dropdown options, so a single select can swap the rest of the form. `notEquals` shows a field while the value is anything else, and `anyOf` shows it when any one of several rules matches. Hidden `required` fields don't flag the extension as needing setup.
 
 Engines ask whether the site puts an Anubis proof-of-work page in front of its results. Answer yes and the template sets `challenges: ["anubis"]`, so degoog solves the page before your engine reads the response. Inside a store, the package.json entry also gets `minDegoogVersion: "1.0.0"`, because degoog solves these pages from 1.0.0 onwards.
 
@@ -113,7 +115,7 @@ Doctor checks both values. It fails on an unknown `challenges` kind or a `handle
 
 ## Running without prompts
 
-Every command also runs with no interactive UI, for scripts, CI, or piping. The CLI goes headless when you pass `-y` / `--yes`, when stdin or stdout is not a terminal, or when `CI` or `DEGOOG_HEADLESS=1` is set. Headless runs never prompt: they read flags, fall back to defaults, and exit `1` when a required value is missing or a check fails. Colours are dropped when output is not a terminal, or with `--no-color` / `NO_COLOR`.
+Every command also runs without the interactive UI, for scripts, CI, or piping. The CLI goes headless when you pass `-y` / `--yes`, when stdin or stdout is not a terminal, or when `CI` or `DEGOOG_HEADLESS=1` is set. Headless runs never prompt. They read flags, fall back to defaults, and exit `1` when a required value is missing or a check fails. The CLI drops colours when output is not a terminal, or with `--no-color` / `NO_COLOR`.
 
 ```sh
 degoog-cli login --yes --instance-url https://search.example.com --api-key "$DEGOOG_API_KEY" --username "Jane Dev"
@@ -134,7 +136,7 @@ Boolean flags accept `--flag=false`. Themes created headless without `--include`
 
 ## Docker Compose
 
-If you prefer compose over the wrapper script:
+If you'd rather use compose than the wrapper script:
 
 ```sh
 docker compose run --rm degoog-cli

@@ -11,7 +11,7 @@ const indexTpl = (name: string) => `// If this file also exports other hooks (sl
 //   settingsSchema: [ /* shared fields */ ],
 // };
 //
-// All hooks in this file will share that id and appear as one card in settings.
+// Every hook in this file then shares that id and shows as one card in settings.
 
 export const middleware = {
   id: "${name}",

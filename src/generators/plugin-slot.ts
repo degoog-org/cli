@@ -11,7 +11,7 @@ const indexTpl = (name: string) => `// If this file also exports other hooks (in
 //   settingsSchema: [ /* shared fields */ ],
 // };
 //
-// All hooks in this file will share that id and appear as one card in settings.
+// Every hook in this file then shares that id and shows as one card in settings.
 
 // positions: above-results | below-results | full-width-above-results | above-sidebar | below-sidebar | knowledge-panel | at-a-glance
 // full-width-above-results renders above the whole results layout at full content width.
@@ -25,14 +25,17 @@ export const slot = {
    * Set to true if your execute() returns HTML that causes the browser
    * to fetch external URLs (images, scripts, etc.).
    * Set to false if all network access goes through context.fetch / signProxyUrl / signFaviconUrl.
-   * Leaving this unset shows an ambiguous badge in the degoog settings page.
+   * Leave it unset and the degoog settings page shows an ambiguous badge.
    */
   isClientExposed: false,
 
   // waitForResults: false,
   // settingsId: "${name}",
   // settingsSchema: [
-  //   { key: "setting", label: "Setting", type: "text" },
+  //   { key: "mode", label: "Mode", type: "select", options: ["simple", "custom"], default: "simple" },
+  //   // visibleWhen shows a field only while another field holds a value.
+  //   // equals takes one value or an array of them. In an array of rules, every rule must match.
+  //   { key: "customUrl", label: "Custom URL", type: "url", visibleWhen: { key: "mode", equals: "custom" } },
   // ],
   //
   // configure(settings) {},
@@ -41,7 +44,7 @@ export const slot = {
   // async init(ctx) {
   //   ctx.template // template.html contents
   //   ctx.pluginId // installed plugin folder ID assigned by degoog (alias: ctx.id)
-  //   ctx.apiBase  // /api/plugin/<ctx.pluginId> - base for your own routes
+  //   ctx.apiBase  // /api/plugin/<ctx.pluginId>, the base for your own routes
   //   ctx.routeUrl // (path) => /api/plugin/<ctx.pluginId>/<path>
   //   ctx.dir      // absolute path to plugin folder (do NOT derive route IDs from it)
   //   ctx.readFile // async file reader
