@@ -1,4 +1,4 @@
-FROM oven/bun:1-alpine
+FROM oven/bun:1.4.4-alpine
 
 RUN apk add --no-cache su-exec
 

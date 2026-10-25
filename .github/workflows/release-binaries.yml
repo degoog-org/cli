@@ -16,7 +16,7 @@ jobs:
       - name: Bun, not rust.. yet
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: 1.4.4
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
