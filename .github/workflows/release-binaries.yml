@@ -27,6 +27,13 @@ jobs:
           VERSION="${GITHUB_REF#refs/tags/}"
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Stamp the tag into package.json
+        run: |
+          jq --arg v "${VERSION#v}" '.version = $v' package.json > package.tmp.json
+          mv package.tmp.json package.json
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+
       - name: Pray this all works
         run: |
           mkdir -p dist

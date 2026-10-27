@@ -5,7 +5,7 @@ import { argv } from "../utils/argv"
 import { isHeadless, fail } from "../utils/headless"
 import type { Config } from "../types"
 
-const isValidUrl = (val: string) => {
+const isValidUrl = (val?: string) => {
   if (!val) return undefined
   try {
     const u = new URL(val)

@@ -66,6 +66,7 @@ ${challenges ? `  challenges: ["anubis"],\n` : ""}
       snippet: string
       source: string
       thumbnail?: string
+      publishedAt?: string
     }> = []
 
     try {

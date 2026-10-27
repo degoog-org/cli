@@ -31,7 +31,18 @@ export default {
 
   // settingsSchema: [
   //   { key: "apiKey", label: "API Key", type: "password", required: true },
-  //   // A "list" field lets users manage a repeatable list of structured rows.
+  //   // Field types: text, password, url, number, toggle, textarea, select,
+  //   // multiselect, hex, range, file, urllist, list, info.
+  //   { key: "accent", label: "Accent colour", type: "hex" },
+  //   { key: "weight", label: "Weight", type: "range", min: "0", max: "10", step: "1" },
+  //   // Uploaded files land in your plugin's uploads/ folder; the value is the
+  //   // served path (/plugins/<folderName>/uploads/<file>).
+  //   { key: "logo", label: "Logo", type: "file", accept: "image/*", maxSizeKb: "512" },
+  //   // Give fields the same "fieldset" to group them under one titled section.
+  //   { key: "host", label: "Host", type: "text", fieldset: "Connection" },
+  //   { key: "port", label: "Port", type: "number", fieldset: "Connection" },
+  //   // A "list" field lets users manage a repeatable list of structured rows
+  //   // that can be reordered by drag and drop (the stored order is the position).
   //   // The value arrives in configure() as a JSON array string; JSON.parse it.
   //   // {
   //   //   key: "bangs", label: "Custom bangs", type: "list", addLabel: "+ Add bang",

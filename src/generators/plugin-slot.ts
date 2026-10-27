@@ -36,6 +36,9 @@ export const slot = {
   //   // visibleWhen shows a field only while another field holds a value.
   //   // equals takes one value or an array of them. In an array of rules, every rule must match.
   //   { key: "customUrl", label: "Custom URL", type: "url", visibleWhen: { key: "mode", equals: "custom" } },
+  //   // Types: text, number, password, url, toggle, textarea, select, multiselect,
+  //   // hex, range (min/max/step), file (accept, maxSizeKb), urllist, list, info.
+  //   // Group fields with a shared "fieldset". "list" rows drag to reorder.
   // ],
   //
   // configure(settings) {},
