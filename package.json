@@ -1,6 +1,6 @@
 {
   "name": "degoog-cli",
-  "version": "0.8.1",
+  "version": "0.9.0",
   "description": "CLI toolset for degoog",
   "type": "module",
   "scripts": {

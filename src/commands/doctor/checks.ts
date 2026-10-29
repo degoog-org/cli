@@ -3,6 +3,7 @@ import type { Dirent } from "node:fs"
 import { join, basename } from "node:path"
 import { exists } from "./detect"
 import { findStoreRoot } from "../../utils/store"
+import { checkImageSizes } from "./images"
 import { ENGINE_CHALLENGES, type CheckResult, type ExtensionKind, type RunSummary } from "./types"
 
 const readJson = async <T>(path: string): Promise<T | null> => {
@@ -415,6 +416,8 @@ export const runChecks = async (
     results.push(...faviconChecks)
     if (faviconChecks.some((c) => c.status === "fail")) failed = true
   }
+
+  results.push(...(await checkImageSizes(dir)))
 
   return { results, failed }
 }
