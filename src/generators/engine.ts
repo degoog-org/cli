@@ -58,6 +58,17 @@ ${challenges ? `  challenges: ["anubis"],\n` : ""}
         message: string,
         opts?: { httpStatus?: number; engine?: string }
       ) => Error
+      emit?: (
+        results: Array<{
+          title: string
+          url: string
+          snippet: string
+          source: string
+          thumbnail?: string
+        }>,
+        progress?: { expected?: number }
+      ) => void
+      signal?: AbortSignal
     }
   ) {
     const results: Array<{
