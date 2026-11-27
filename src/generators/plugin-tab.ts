@@ -54,6 +54,7 @@ export const tab = {
     dir: string
     fetch: typeof fetch
     signProxyUrl: (url: string) => string
+    authenticated: boolean
     useCache: <T>(namespace: string, defaultTtlMs: number) => {
       get: (key: string) => Promise<T | null>
       set: (key: string, value: T, ttlMs?: number) => Promise<void>

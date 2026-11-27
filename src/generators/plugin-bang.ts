@@ -64,6 +64,7 @@ export default {
     readFile: (filename: string) => Promise<string>
     signProxyUrl: (url: string) => string
     fetch: typeof fetch
+    authenticated: boolean
     useCache: <T>(namespace: string, defaultTtlMs: number) => {
       get: (key: string) => Promise<T | null>
       set: (key: string, value: T, ttlMs?: number) => Promise<void>
