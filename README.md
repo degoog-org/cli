@@ -103,6 +103,8 @@ Themes also get `style.css` with every CSS variable set to the degoog defaults f
 
 The generated theme README also covers the script-free `/nojs` page. That page reuses your ordinary templates, and you override single files by dropping them in a `nojs/` folder under the same filename, not through `theme.json`.
 
+Bang, slot and tab templates type `context.authenticated`, which is `true` when the visitor is signed in to degoog settings. The routes template shows an open route that reads `{ authenticated }` from its second argument and a route gated with `auth: true`, which degoog refuses with a 401 before your handler runs. Use these to put private features behind the settings login, ideally behind a "Gate behind auth" setting so the instance owner decides. See [Gating behind the settings login](https://degoog-org.github.io/docs/developer.html#auth-gate).
+
 Plugin templates already include `isClientExposed`. Set it to `true` if your plugin makes the browser fetch external URLs directly, or `false` if everything goes through the server. Leave it unset and degoog settings shows a warning badge.
 
 The commented `settingsSchema` in plugin and engine templates shows `visibleWhen`, which keeps a field hidden until another field holds a given value. Give `equals` an array to show one field for several dropdown options, so a single select can swap the rest of the form. `notEquals` shows a field while the value is anything else, and `anyOf` shows it when any one of several rules matches. Hidden `required` fields don't flag the extension as needing setup.
